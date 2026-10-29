@@ -31,7 +31,7 @@ pub fn focused_element() -> Option<FocusedElement> {
 
 pub fn insert_text(text: &str, _target: &FrontApp, _opts: InsertOptions) -> anyhow::Result<()> {
     copy_to_clipboard(text)?;
-    anyhow::bail!("automatic paste is not supported on this OS yet — text copied")
+    anyhow::bail!("automatic paste is not supported on this OS yet, so the text was copied")
 }
 
 pub fn copy_to_clipboard(text: &str) -> anyhow::Result<()> {

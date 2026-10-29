@@ -11,6 +11,7 @@ import bowUrl from "../../../../brand/patterns/muvendar-bow.svg";
 import fishUrl from "../../../../brand/patterns/muvendar-fish.svg";
 
 import { Dots, aythamMark } from "../shared/dots";
+import { Voice } from "../shared/voice";
 import { h, fmtBytes } from "../shared/dom";
 import { getLang, setLang, t, tt, type Key } from "../shared/i18n";
 import { mock } from "./mock";
@@ -86,7 +87,7 @@ function toast(msg: string) {
 const pageHead = (n: number, key: Key, sub?: string) => {
   const { primary, secondary } = tt(key);
   return [
-    h("div", { class: "eyebrow" }, `${String(n).padStart(2, "0")} — ${secondary}`),
+    h("div", { class: "eyebrow" }, `${String(n).padStart(2, "0")} · ${secondary}`),
     h("h1", { class: "page-title" }, primary),
     sub ? h("p", { class: "page-sub" }, sub) : null,
   ];
@@ -133,8 +134,26 @@ function modeCards() {
 
 function homePage() {
   const key = triggerGlyph(S().hotkey.key);
-  const pillDots = new Dots({ size: 10, ring: false });
-  mounted.push(pillDots);
+  // The hero pill plays the dictation cycle on its own: dots → waveform → ஃ → done.
+  const pillVoice = new Voice({ height: 22 });
+  mounted.push(pillVoice);
+  const cycle: [Parameters<Voice["setState"]>[0], number][] = [["idle", 1600], ["listening", 3200], ["transcribing", 1500], ["done", 1300]];
+  let step = 0;
+  let timer = 0;
+  let wob = 0;
+  const advance = () => {
+    const [state, ms] = cycle[step++ % cycle.length];
+    pillVoice.setState(state);
+    timer = window.setTimeout(advance, ms);
+  };
+  const talk = () => {
+    const t0 = performance.now() / 1000;
+    pillVoice.setLevel(0.35 + 0.55 * Math.abs(Math.sin(t0 * 3.3) * Math.sin(t0 * 1.1)));
+    wob = requestAnimationFrame(talk);
+  };
+  advance();
+  talk();
+  mounted.push({ destroy: () => (clearTimeout(timer), cancelAnimationFrame(wob)) });
   const words = store.history.reduce((n, i) => n + i.text.split(/\s+/).filter(Boolean).length, 0);
   const audioMin = store.history.reduce((n, i) => n + i.audioMs, 0) / 60000;
   const saved = Math.max(0, words / 40 - audioMin); // vs typing at 40 wpm
@@ -159,7 +178,7 @@ function homePage() {
       "section",
       { class: "card hero" },
       h("img", { class: "hero-art", src: kolamUrl, alt: "" }),
-      h("div", { class: "keys" }, h("span", { class: "keycap" }, key), h("span", { class: "keycap" }, key), h("span", { class: "pill" }, pillDots.el)),
+      h("div", { class: "keys" }, h("span", { class: "keycap" }, key), h("span", { class: "keycap" }, key), h("span", { class: "pill" }, pillVoice.el)),
       h("h2", { lang: getLang() }, t("home.title")),
       h("p", null, t("home.lede")),
       h(
@@ -168,6 +187,13 @@ function homePage() {
         h("button", { class: "btn accent", onclick: () => api.toggleDictation() }, `${key}${key}  ${getLang() === "ta" ? "இப்போது பேசு" : "Dictate now"}`),
         h("span", { class: "segmented", role: "group", "aria-label": t("ov.mode") }, ...(Object.keys(MODE_LABELS) as OutputMode[]).map((m) => h("button", { "aria-pressed": String(S().outputMode === m), onclick: () => api.setOutputMode(m).then(() => save({ outputMode: m })) }, MODE_LABELS[m].short))),
       ),
+    ),
+    h(
+      "section",
+      { class: "card login-card" },
+      h("span", { class: "login-mark", html: aythamMark(30, "var(--mz-manjal)", "var(--mz-mai)") }),
+      h("div", { class: "label" }, h("strong", null, t("home.login")), h("small", null, t("home.loginHint"))),
+      toggle(S().launchAtLogin, (v) => save({ launchAtLogin: v }), t("home.login")),
     ),
     ready()
       ? null
@@ -259,7 +285,7 @@ function writingPage() {
   const polishState = store.polish
     ? store.polish.reachable
       ? `✓ Ollama · ${store.polish.models.length} models`
-      : `✕ ${store.polish.error ?? "unreachable"} — ollama.com`
+      : `✕ ${store.polish.error ?? "unreachable"} · ollama.com`
     : "";
   const mic = h(
     "select",
@@ -379,7 +405,7 @@ function historyList(items: HistoryItem[]) {
       return h(
         "article",
         { class: "receipt" },
-        h("div", { class: "receipt-head" }, h("span", null, `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`), h("span", null, `${i.appName ?? "—"} · ${MODE_LABELS[i.mode].short}`)),
+        h("div", { class: "receipt-head" }, h("span", null, `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`), h("span", null, `${i.appName ?? t("hist.copied")} · ${MODE_LABELS[i.mode].short}`)),
         h("div", { class: "receipt-text", lang: i.language === "en" ? "en" : "ta" }, i.text),
         h(
           "div",
@@ -409,7 +435,7 @@ function permissionsPage() {
         { class: `check ${ok ? "ok" : "todo"}`, style: "border:0" },
         h("span", { class: "mark" }, ok ? "✓" : "!"),
         h("div", { class: "label" }, h("strong", null, t(title)), h("small", null, t(why))),
-        ok ? h("span", { class: "mono" }, state === "notRequired" ? "—" : t("perm.granted")) : [h("button", { class: "btn small primary", onclick: () => grant(kind) }, t("perm.grant")), h("button", { class: "btn small ghost", onclick: () => api.openPermissionSettings(kind) }, t("perm.open"))],
+        ok ? h("span", { class: "mono" }, state === "notRequired" ? t("perm.notNeeded") : t("perm.granted")) : [h("button", { class: "btn small primary", onclick: () => grant(kind) }, t("perm.grant")), h("button", { class: "btn small ghost", onclick: () => api.openPermissionSettings(kind) }, t("perm.open"))],
       ),
     );
   };
@@ -444,9 +470,9 @@ function onboarding() {
   const rec = store.models.find((m) => m.recommended) ?? store.models[0];
   const steps = [
     () => [h("h1", { class: "page-title" }, t("ob.welcome")), h("p", { class: "page-sub" }, t("ob.welcomeLede")), h("p", { class: "page-sub" }, t("about.private"))],
-    () => [h("div", { class: "eyebrow" }, `01 — ${t("ob.step1")}`), ...permissionsPage().slice(1)],
-    () => [h("div", { class: "eyebrow" }, `02 — ${t("ob.step2")}`), h("h1", { class: "page-title" }, t("models.title")), h("p", { class: "page-sub" }, t("models.lede")), rec ? modelCard(rec) : null],
-    () => [h("div", { class: "eyebrow" }, `03 — ${t("ob.step3")}`), h("h1", { class: "page-title" }, t("home.title")), h("p", { class: "page-sub" }, t("home.lede")), modeCards()],
+    () => [h("div", { class: "eyebrow" }, `01 · ${t("ob.step1")}`), ...permissionsPage().slice(1)],
+    () => [h("div", { class: "eyebrow" }, `02 · ${t("ob.step2")}`), h("h1", { class: "page-title" }, t("models.title")), h("p", { class: "page-sub" }, t("models.lede")), rec ? modelCard(rec) : null],
+    () => [h("div", { class: "eyebrow" }, `03 · ${t("ob.step3")}`), h("h1", { class: "page-title" }, t("home.title")), h("p", { class: "page-sub" }, t("home.lede")), modeCards()],
   ];
   const last = step === steps.length - 1;
   return h(
@@ -463,6 +489,48 @@ function onboarding() {
         { class: "onboard-actions" },
         step > 0 && !last ? h("button", { class: "btn ghost", onclick: next }, t("ob.skip")) : null,
         h("button", { class: "btn primary", onclick: last ? finish : next }, step === 0 ? t("ob.start") : last ? t("ob.done") : t("ob.next")),
+      ),
+    ),
+  );
+}
+
+// Asked once, after onboarding: start Mozhi at login so the double-tap is always ready.
+const LOGIN_ASKED = "mozhi.loginPrompted";
+const loginAsked = () => {
+  try {
+    return localStorage.getItem(LOGIN_ASKED) === "1";
+  } catch {
+    return true;
+  }
+};
+function loginPrompt() {
+  const close = (enable: boolean) => {
+    try {
+      localStorage.setItem(LOGIN_ASKED, "1");
+    } catch {
+      /* the toggle on Home still works */
+    }
+    if (enable) save({ launchAtLogin: true });
+    else render();
+  };
+  const voice = new Voice({ height: 30 });
+  mounted.push(voice);
+  voice.setState("done");
+  return h(
+    "div",
+    { class: "modal-backdrop" },
+    h(
+      "div",
+      { class: "modal", role: "dialog", "aria-modal": "true", "aria-labelledby": "login-title" },
+      h("img", { class: "modal-kolam", src: kolamUrl, alt: "" }),
+      h("div", { class: "modal-voice" }, voice.el),
+      h("h2", { id: "login-title" }, t("login.title")),
+      h("p", null, t("login.body")),
+      h(
+        "div",
+        { class: "modal-actions" },
+        h("button", { class: "btn ghost", onclick: () => close(false) }, t("login.no")),
+        h("button", { class: "btn primary", autofocus: true, onclick: () => close(true) }, t("login.yes")),
       ),
     ),
   );
@@ -518,7 +586,7 @@ function go(page: Page) {
 
 // ── render ──────────────────────────────────────────────────────────────────
 
-let mounted: Dots[] = [];
+let mounted: { destroy(): void }[] = [];
 let tryArea: HTMLTextAreaElement | null = null;
 const statusDots = new Dots({ size: 7, ring: false });
 
@@ -571,7 +639,9 @@ function render() {
       h("main", { class: "main" }, h("div", { class: "page", "data-page": store.page }, ...pages[store.page]().flat())),
     ),
     store.settings.onboarded ? "" : onboarding(),
+    store.settings.onboarded && !store.settings.launchAtLogin && !loginAsked() ? loginPrompt() : "",
   );
+  (document.querySelector(".modal .btn.primary") as HTMLButtonElement | null)?.focus();
 
   if (keepFocus) {
     const el = document.querySelector(keepFocus.sel) as HTMLInputElement | null;

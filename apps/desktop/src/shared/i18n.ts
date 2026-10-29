@@ -8,13 +8,13 @@ const S = {
   "ov.transcribing": { ta: "எழுதுகிறேன்…", en: "Writing…" },
   "ov.inserting": { ta: "ஒட்டுகிறேன்…", en: "Inserting…" },
   "ov.into": { ta: "இதில் எழுதும்", en: "Typing into" },
-  "ov.noApp": { ta: "எந்த app-உம் focus-இல் இல்லை — clipboard-க்கு copy ஆகும்", en: "No app in focus — text will be copied" },
-  "ov.self": { ta: "Mozhi — எழுத வேண்டிய app-க்கு மாறுங்கள்", en: "Mozhi — switch to the app you want to type in" },
+  "ov.noApp": { ta: "எந்த app-உம் focus-இல் இல்லை. Clipboard-க்கு copy ஆகும்", en: "No app in focus. Text will be copied" },
+  "ov.self": { ta: "Mozhi: எழுத வேண்டிய app-க்கு மாறுங்கள்", en: "Mozhi: switch to the app you want to type in" },
   "ov.insert": { ta: "இடு", en: "Insert" },
   "ov.cancel": { ta: "ரத்து", en: "Cancel" },
   "ov.hintInsert": { ta: "இட", en: "insert" },
   "ov.hintCancel": { ta: "ரத்து", en: "cancel" },
-  "ov.placeholder": { ta: "பேசுங்கள் — தமிழ், Tanglish, English…", en: "Speak — Tamil, Tanglish or English…" },
+  "ov.placeholder": { ta: "பேசுங்கள்: தமிழ், Tanglish, English…", en: "Speak in Tamil, Tanglish or English…" },
   "ov.mode": { ta: "எழுத்து முறை", en: "Writing mode" },
 
   // nav
@@ -43,6 +43,18 @@ const S = {
   "home.words": { ta: "சொற்கள்", en: "words" },
   "home.dictations": { ta: "முறை", en: "dictations" },
   "home.saved": { ta: "நிமிடம் சேமிப்பு", en: "min saved" },
+  "home.login": { ta: "Login செய்யும்போதே மொழி திறக்கட்டும்", en: "Open Mozhi when you log in" },
+  "home.loginHint": {
+    ta: "இருமுறை தட்டுவது எப்போதும் தயாராக இருக்கும். மொழி menu bar-இல் அமைதியாகக் காத்திருக்கும்.",
+    en: "So the double-tap is always ready. Mozhi waits quietly in the menu bar.",
+  },
+  "login.title": { ta: "மொழி தானாகத் திறக்கட்டுமா?", en: "Open Mozhi automatically?" },
+  "login.body": {
+    ta: "கணினியில் login செய்யும்போதே மொழி தொடங்கும், அதனால் இருமுறை தட்டியதும் உடனே பேசலாம். Home-இல் எப்போது வேண்டுமானாலும் மாற்றலாம்.",
+    en: "Mozhi will start when you log in, so a double-tap works straight away. You can change this any time on Home.",
+  },
+  "login.yes": { ta: "ஆம், தானாகத் திற", en: "Yes, open at login" },
+  "login.no": { ta: "இப்போது வேண்டாம்", en: "Not now" },
 
   // models
   "models.title": { ta: "பேச்சு மாதிரிகள்", en: "Speech models" },
@@ -67,8 +79,8 @@ const S = {
   "writing.title": { ta: "எப்படி எழுத வேண்டும்?", en: "How should Mozhi write?" },
   "writing.polish": { ta: "உள்ளூர் AI மெருகூட்டல்", en: "Local AI polish" },
   "writing.polishLede": {
-    ta: "Ollama மூலம் உங்கள் கணினியில் ஓடும் இலவச LLM — நிறுத்தக்குறிகளைச் சரிசெய்து, ஆங்கிலச் சொற்களை ஆங்கிலத்திலேயே வைக்கும்.",
-    en: "A free LLM running on your machine via Ollama — fixes punctuation and keeps English words in English.",
+    ta: "Ollama மூலம் உங்கள் கணினியில் ஓடும் இலவச LLM. நிறுத்தக்குறிகளைச் சரிசெய்து, ஆங்கிலச் சொற்களை ஆங்கிலத்திலேயே வைக்கும்.",
+    en: "A free LLM running on your machine via Ollama. It fixes punctuation and keeps English words in English.",
   },
   "writing.endpoint": { ta: "Ollama முகவரி", en: "Ollama address" },
   "writing.llm": { ta: "LLM மாதிரி", en: "LLM model" },
@@ -106,7 +118,7 @@ const S = {
   // permissions
   "perm.title": { ta: "அனுமதிகள்", en: "Permissions" },
   "perm.mic": { ta: "மைக்ரோஃபோன்", en: "Microphone" },
-  "perm.micWhy": { ta: "நீங்கள் dictate செய்யும்போது மட்டும் கேட்க.", en: "To listen — only while you dictate." },
+  "perm.micWhy": { ta: "நீங்கள் dictate செய்யும்போது மட்டும் கேட்க.", en: "To listen, only while you dictate." },
   "perm.ax": { ta: "Accessibility", en: "Accessibility" },
   "perm.axWhy": {
     ta: "Control இருமுறை தட்டுவதை அறிய, நீங்கள் எந்த app-இல் இருக்கிறீர்கள் என்று பார்க்க, எழுத்தை ஒட்ட.",
@@ -115,13 +127,15 @@ const S = {
   "perm.grant": { ta: "அனுமதி கொடு", en: "Allow" },
   "perm.open": { ta: "Settings-ஐத் திற", en: "Open Settings" },
   "perm.granted": { ta: "அனுமதிக்கப்பட்டது", en: "Allowed" },
+  "perm.notNeeded": { ta: "தேவையில்லை", en: "Not needed" },
+  "hist.copied": { ta: "நகல் மட்டும்", en: "Copied only" },
   "perm.missing": { ta: "தேவை", en: "Needed" },
 
   // about
-  "about.title": { ta: "ஃ — மூன்று புள்ளிகள்", en: "ஃ — three dots" },
+  "about.title": { ta: "ஃ · மூன்று புள்ளிகள்", en: "ஃ · three dots" },
   "about.story": {
-    ta: "ஆய்தம் — தமிழுக்கே உரிய எழுத்து. மூன்று புள்ளிகள்: சேர, சோழ, பாண்டிய மூவேந்தர்; கோலத்தின் புள்ளிகள்; உங்கள் குரலின் மூன்று துடிப்புகள்.",
-    en: "Āytham — a letter only Tamil has. Three dots: the three crowned kings, Chera, Chola and Pandya; the pulli of a kolam; the three beats of your voice.",
+    ta: "ஆய்தம்: தமிழுக்கே உரிய எழுத்து. மூன்று புள்ளிகள்: சேர, சோழ, பாண்டிய மூவேந்தர்; கோலத்தின் புள்ளிகள்; உங்கள் குரலின் மூன்று துடிப்புகள்.",
+    en: "Āytham, a letter only Tamil has. Three dots: the three crowned kings, Chera, Chola and Pandya; the pulli of a kolam; the three beats of your voice.",
   },
   "about.open": { ta: "திறந்த மூலம் · Apache-2.0", en: "Open source · Apache-2.0" },
   "about.private": { ta: "கணக்கு இல்லை. Cloud இல்லை. உங்கள் குரல் உங்கள் கணினியை விட்டு வெளியேறாது.", en: "No account. No cloud. Your voice never leaves your computer." },
@@ -129,13 +143,13 @@ const S = {
   // onboarding
   "ob.welcome": { ta: "வணக்கம்!", en: "Vanakkam!" },
   "ob.welcomeLede": {
-    ta: "Mozhi உங்கள் தமிழ்ப் பேச்சை எந்த app-இலும் எழுத்தாக்கும் — முழுவதும் உங்கள் கணினியிலேயே.",
-    en: "Mozhi turns your spoken Tamil into text in any app — entirely on your computer.",
+    ta: "Mozhi உங்கள் தமிழ்ப் பேச்சை எந்த app-இலும் எழுத்தாக்கும், முழுவதும் உங்கள் கணினியிலேயே.",
+    en: "Mozhi turns your spoken Tamil into text in any app, entirely on your computer.",
   },
   "ob.start": { ta: "தொடங்குவோம்", en: "Let's begin" },
   "ob.next": { ta: "அடுத்து", en: "Next" },
   "ob.skip": { ta: "பிறகு", en: "Later" },
-  "ob.done": { ta: "முடிந்தது — பேசுங்கள்!", en: "Done — start talking!" },
+  "ob.done": { ta: "முடிந்தது. பேசுங்கள்!", en: "Done. Start talking!" },
   "ob.step1": { ta: "அனுமதிகள்", en: "Permissions" },
   "ob.step2": { ta: "மாதிரியைப் பதிவிறக்கு", en: "Download a model" },
   "ob.step3": { ta: "முயற்சி செய்", en: "Try it" },
@@ -156,5 +170,5 @@ export const setLang = (l: Lang) => {
 };
 export const getLang = () => lang;
 export const t = (k: Key) => S[k][lang];
-/** Both languages, primary first — for headings that carry the bilingual voice. */
+/** Both languages, primary first: for headings that carry the bilingual voice. */
 export const tt = (k: Key) => ({ primary: S[k][lang], secondary: S[k][lang === "ta" ? "en" : "ta"] });

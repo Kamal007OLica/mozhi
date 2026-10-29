@@ -91,6 +91,15 @@ pub fn run() {
             tray::create(&handle)?;
             preload_model(&ctrl);
 
+            // Silero VAD (0.9 MB) cuts hallucinated text from silence. New model downloads fetch
+            // it too; this covers installs that already had a model before VAD shipped.
+            let models_dir = ctrl.engine.models_dir();
+            tauri::async_runtime::spawn(async move {
+                if let Err(e) = engine::models::ensure_vad(&models_dir).await {
+                    log::warn!("VAD model not fetched (energy trimming will be used): {e:#}");
+                }
+            });
+
             if settings.get().onboarded {
                 platform::set_dock_visible(&handle, false);
             } else {

@@ -1,0 +1,71 @@
+/* The voice indicator (voice.ts). Marks are positioned from the centre by JS; colour,
+   glow and the transcribing ring are CSS so each state can restyle them. */
+.voice-viz {
+  --vh: 26px;
+  position: relative;
+  display: inline-block;
+  width: calc(var(--vh) * 2.5);
+  height: calc(var(--vh) * 1.4);
+  flex: none;
+}
+
+.voice-bar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffe9a3 0%, var(--mz-manjal) 45%, #ef8a3c 100%);
+  box-shadow: 0 0 10px rgba(244, 196, 48, 0.35);
+  will-change: transform, width, height, opacity;
+}
+
+.voice-viz[data-state="listening"] .voice-bar {
+  box-shadow:
+    0 0 12px rgba(244, 196, 48, 0.55),
+    0 0 2px rgba(255, 233, 163, 0.9);
+}
+
+.voice-viz[data-state="done"] .voice-bar {
+  background: linear-gradient(180deg, #d9ffe6, #6fdc9a);
+  box-shadow: 0 0 14px rgba(111, 220, 154, 0.6);
+}
+
+.voice-viz[data-state="error"] .voice-bar {
+  background: linear-gradient(180deg, #ffb3ad, var(--mz-kumkum-300));
+  box-shadow: 0 0 12px rgba(229, 87, 79, 0.55);
+}
+
+/* Nataraja's prabha, reduced to a glowing ring that spins while Mozhi writes */
+.voice-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--vh) * 1.18);
+  height: calc(var(--vh) * 1.18);
+  margin: calc(var(--vh) * -0.59) 0 0 calc(var(--vh) * -0.59);
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 55%, rgba(244, 196, 48, 0.9) 80%, rgba(239, 138, 60, 0.95) 92%, transparent 100%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 240ms var(--mz-ease-out),
+    transform 420ms var(--mz-ease-spring);
+}
+.voice-viz[data-state="transcribing"] .voice-ring {
+  opacity: 1;
+  transform: scale(1);
+  animation: voice-ring 0.9s linear infinite;
+}
+@keyframes voice-ring {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-viz[data-state="transcribing"] .voice-ring {
+    animation: none;
+  }
+}

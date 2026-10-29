@@ -1,0 +1,106 @@
+name: Release desktop app
+
+# Builds Mozhi for Windows and macOS (Apple Silicon) and attaches the installers to a
+# GitHub release. Push a tag like v0.1.0-beta.1 to run it, or start it by hand from the
+# Actions tab with an existing tag.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build and attach to (e.g. v0.1.0-beta.1)"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows (x64)
+            os: windows-latest
+            args: ""
+            # Portable CPU baseline: never compile whisper.cpp for the CI machine's own CPU.
+            ggml: "AVX2"
+          - name: macOS (Apple Silicon)
+            os: macos-latest
+            args: "--target aarch64-apple-darwin"
+            ggml: "ARM"
+    runs-on: ${{ matrix.os }}
+    env:
+      GGML_NATIVE: "OFF"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: CPU baseline for whisper.cpp (x64)
+        if: matrix.ggml == 'AVX2'
+        shell: bash
+        run: |
+          {
+            echo "GGML_AVX=ON"
+            echo "GGML_AVX2=ON"
+            echo "GGML_FMA=ON"
+            echo "GGML_F16C=ON"
+            echo "GGML_AVX512=OFF"
+          } >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin' || '' }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri -> target
+          key: ${{ matrix.ggml }}
+
+      - name: Install JavaScript dependencies
+        run: npm ci
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: apps/desktop
+          tauriScript: npm run tauri
+          args: ${{ matrix.args }}
+          tagName: ${{ inputs.tag || github.ref_name }}
+          releaseName: "Mozhi ${{ inputs.tag || github.ref_name }}"
+          releaseDraft: false
+          prerelease: true
+          releaseBody: |
+            ## Mozhi · மொழி beta
+
+            Open-source, on-device Tamil voice typing. Double-tap Control, speak Tamil, Tanglish or English, and the text lands in the app you're in.
+
+            **This is an unsigned beta for testing.**
+
+            ### macOS (Apple Silicon, macOS 12+)
+            1. Download the `.dmg`, open it and drag **Mozhi** to Applications.
+            2. The first time, right-click Mozhi in Applications and choose **Open**, then **Open** again. (It isn't notarised by Apple yet.) If macOS still refuses, open System Settings → Privacy & Security and click **Open Anyway**.
+            3. Allow **Microphone** and **Accessibility** when asked. Accessibility is what lets Mozhi hear the double-tap and paste for you.
+
+            ### Windows (10/11, 64-bit)
+            1. Download the `-setup.exe` (or the `.msi`) and run it.
+            2. SmartScreen may warn that the app is unrecognised: click **More info** → **Run anyway**. (It isn't code-signed yet.)
+
+            ### First run
+            Mozhi downloads a speech model (about 550 MB for the recommended one) the first time. After that everything runs offline.
+
+            Found a problem? [Report it here](https://github.com/Kamal007OLica/mozhi/issues/new/choose).

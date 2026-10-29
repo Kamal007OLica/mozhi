@@ -1,5 +1,6 @@
-/* The overlay window is transparent; only the card is painted. The card sits at the
-   bottom of the window and the window grows upward with it (see overlay_resize). */
+/* The overlay window is transparent; only the stage is painted. The card sits at the
+   bottom of the window and the window grows upward with it (see overlay_resize). The
+   margin around the card is room for its shadow and the voice-reactive aura. */
 html,
 body.overlay-body {
   background: transparent;
@@ -12,58 +13,168 @@ body.overlay-body {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 0 18px 18px;
+  padding: 0 40px 34px;
 }
 
-.card {
-  --ink: var(--mz-paper);
-  --muted: rgba(247, 240, 227, 0.56);
+@property --spin {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.stage {
+  --lvl: 0;
   position: relative;
   width: 100%;
-  border-radius: var(--mz-r-xl);
-  background: var(--mz-mai);
+  max-width: 520px;
+}
+
+/* ── aura: a soft turmeric/vermilion glow under the card that breathes with the voice ── */
+.aura {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -18px;
+  height: 70%;
+  border-radius: 50%;
+  background:
+    radial-gradient(55% 75% at 32% 60%, rgba(244, 196, 48, 0.75), transparent 70%),
+    radial-gradient(55% 75% at 68% 60%, rgba(195, 22, 28, 0.75), transparent 70%);
+  filter: blur(26px);
+  opacity: calc(0.12 + var(--lvl) * 0.7);
+  transform: scale(calc(0.88 + var(--lvl) * 0.2));
+  transition: opacity 180ms linear;
+  pointer-events: none;
+}
+.stage[data-phase="transcribing"] .aura,
+.stage[data-phase="inserting"] .aura {
+  opacity: 0.45;
+  animation: aura-pulse 1.4s ease-in-out infinite;
+}
+.stage[data-phase="done"] .aura {
+  opacity: 0.55;
+  background: radial-gradient(60% 80% at 50% 60%, rgba(111, 220, 154, 0.8), transparent 70%);
+}
+.stage[data-phase="error"] .aura {
+  opacity: 0.5;
+  background: radial-gradient(60% 80% at 50% 60%, rgba(229, 87, 79, 0.85), transparent 70%);
+}
+@keyframes aura-pulse {
+  50% {
+    opacity: 0.2;
+    transform: scale(0.94);
+  }
+}
+
+/* ── the glass card ── */
+.card {
+  --ink: #f7f0e3;
+  --muted: rgba(247, 240, 227, 0.55);
+  position: relative;
+  isolation: isolate;
+  border-radius: 26px;
   color: var(--ink);
-  box-shadow: var(--mz-float), inset 0 0 0 1px rgba(244, 196, 48, 0.16);
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(244, 196, 48, 0.07), transparent 45%),
+    linear-gradient(180deg, rgba(38, 29, 24, 0.94), rgba(15, 11, 9, 0.96));
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 2px 6px rgba(0, 0, 0, 0.25),
+    0 18px 40px -14px rgba(0, 0, 0, 0.7),
+    0 40px 70px -40px rgba(107, 10, 14, 0.75);
   overflow: hidden;
-  animation: rise 320ms var(--mz-ease-spring) both;
 }
-
-/* canvas grain + a hairline of kumkum on top, like the selvedge of a Manjapai */
-.card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--mz-grain);
-  opacity: 0.22;
-  mix-blend-mode: overlay;
-  pointer-events: none;
+.card.enter {
+  animation: enter 520ms var(--mz-ease-spring) both;
 }
-.card::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 3px;
-  background: var(--mz-kaavi);
-  background-size: 28px 3px;
-  opacity: 0.9;
-  pointer-events: none;
-}
-
-@keyframes rise {
+@keyframes enter {
   from {
     opacity: 0;
-    transform: translateY(14px) scale(0.98);
+    transform: translateY(18px) scale(0.92);
+    filter: blur(6px);
+  }
+}
+
+/* A hairline of light that orbits the edge while Mozhi listens and writes */
+.edge {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  padding: 1.25px;
+  background: conic-gradient(
+    from var(--spin),
+    transparent 0deg,
+    transparent 150deg,
+    rgba(244, 196, 48, 0.95) 215deg,
+    rgba(239, 138, 60, 0.95) 255deg,
+    rgba(229, 87, 79, 0.9) 290deg,
+    transparent 330deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 300ms var(--mz-ease-out);
+  animation: spin 3.2s linear infinite;
+  pointer-events: none;
+}
+.card[data-phase="starting"] .edge {
+  opacity: 0.35;
+}
+.card[data-phase="listening"] .edge {
+  opacity: calc(0.4 + var(--lvl) * 0.6);
+}
+.card[data-phase="transcribing"] .edge,
+.card[data-phase="inserting"] .edge {
+  opacity: 1;
+  animation-duration: 1s;
+}
+.card[data-phase="done"] .edge {
+  opacity: 1;
+  background: linear-gradient(90deg, rgba(111, 220, 154, 0.9), rgba(217, 255, 230, 0.9), rgba(111, 220, 154, 0.9));
+}
+.card[data-phase="error"] .edge {
+  opacity: 1;
+  background: linear-gradient(90deg, rgba(229, 87, 79, 0.95), rgba(255, 179, 173, 0.9), rgba(229, 87, 79, 0.95));
+}
+@keyframes spin {
+  to {
+    --spin: 360deg;
+  }
+}
+
+/* One sweep of light across the card when the text lands */
+.shine {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.1) 48%, rgba(255, 255, 255, 0.02) 56%, transparent 65%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+.card[data-phase="done"] .shine {
+  animation: shine 900ms var(--mz-ease-out) 80ms both;
+}
+@keyframes shine {
+  to {
+    transform: translateX(120%);
   }
 }
 
 /* ── header: the target app is always visible ── */
 .head {
+  position: relative;
+  z-index: 3;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 14px 6px 16px;
+  padding: 14px 14px 4px 14px;
   cursor: grab;
 }
 
@@ -75,23 +186,33 @@ body.overlay-body {
   gap: 10px;
 }
 .target-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
   flex: none;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 4px 10px -2px rgba(0, 0, 0, 0.5);
 }
 .target-text {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 .eyebrow {
-  font-family: var(--mz-font-display);
-  font-size: 11px;
-  letter-spacing: 0.04em;
+  font: 600 10px/1.3 var(--mz-font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--mz-manjal);
   opacity: 0.85;
+}
+.eyebrow:lang(ta),
+.eyebrow[lang="ta"] {
+  font-family: var(--mz-font-display);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: 11px;
 }
 .target-line {
   display: flex;
@@ -123,36 +244,52 @@ body.overlay-body {
 
 .mode {
   flex: none;
-  border: 1px solid rgba(244, 196, 48, 0.55);
-  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(244, 196, 48, 0.35);
+  background: rgba(244, 196, 48, 0.08);
   color: var(--mz-manjal);
   border-radius: var(--mz-r-pill);
-  padding: 3px 12px 2px;
+  padding: 4px 11px 3px;
   font-family: var(--mz-font-display);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12.5px;
+  font-weight: 650;
   cursor: pointer;
-  transition: background var(--mz-dur) var(--mz-ease-out);
+  transition:
+    background var(--mz-dur) var(--mz-ease-out),
+    border-color var(--mz-dur) var(--mz-ease-out);
+}
+.mode::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
 }
 .mode:hover {
-  background: rgba(244, 196, 48, 0.12);
+  background: rgba(244, 196, 48, 0.16);
+  border-color: rgba(244, 196, 48, 0.6);
 }
 
 /* ── transcript ── */
 .transcript {
   position: relative;
-  margin: 4px 16px 0;
-  padding: 6px 0 10px;
-  max-height: 168px;
+  z-index: 3;
+  margin: 2px 16px 0;
+  padding: 8px 0 12px;
+  max-height: 150px;
   overflow-y: auto;
   font-family: var(--mz-font-display);
-  font-size: 19px;
+  font-size: 18.5px;
   line-height: 1.55;
-  font-weight: 450;
+  font-weight: 500;
+  letter-spacing: 0.005em;
   user-select: text;
   -webkit-user-select: text;
   scrollbar-width: none;
-  mask-image: linear-gradient(to bottom, transparent 0, #000 14px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 16px);
 }
 .transcript::-webkit-scrollbar {
   display: none;
@@ -160,50 +297,65 @@ body.overlay-body {
 .transcript.empty {
   color: var(--muted);
   font-weight: 400;
-  font-size: 16px;
+  font-size: 15.5px;
 }
 
 /* ── footer ── */
 .foot {
+  position: relative;
+  z-index: 3;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 10px 10px 10px;
-  border-top: 1px dashed rgba(247, 240, 227, 0.12);
+  margin: 0 8px 8px;
+  padding: 8px 8px 8px 8px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
-.voice {
+.well {
   flex: none;
   display: grid;
   place-items: center;
-  height: 40px;
+  height: 46px;
   min-width: 92px;
-  padding: 0 6px;
-  border-radius: var(--mz-r-pill);
-  background: rgba(195, 22, 28, 0.9);
-  box-shadow: inset 0 0 0 1px rgba(23, 17, 14, 0.4);
+  padding: 0 8px;
+  border-radius: 14px;
+  background:
+    radial-gradient(80% 120% at 50% 100%, rgba(244, 196, 48, calc(0.05 + var(--lvl) * 0.25)), transparent 70%),
+    rgba(0, 0, 0, 0.35);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 .state {
   flex: 1;
   min-width: 0;
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  font-size: 14px;
+  flex-direction: column;
+  line-height: 1.25;
 }
 .status {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--mz-font-display);
+  font-size: 14px;
+  font-weight: 600;
 }
 .timer {
+  font-size: 11px;
   color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.timer:empty {
+  display: none;
 }
 .card[data-phase="done"] .status {
-  color: var(--mz-manjal);
+  color: #a6e9bf;
 }
 .card[data-phase="error"] .status {
-  color: var(--mz-kumkum-300);
+  color: #ffb3ad;
   white-space: normal;
 }
 
@@ -213,47 +365,92 @@ body.overlay-body {
   gap: 8px;
 }
 .hints {
+  display: flex;
+  gap: 10px;
+  margin-right: 2px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
   white-space: nowrap;
 }
+.hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
 .hints kbd {
-  border-color: rgba(247, 240, 227, 0.35);
+  min-width: 0;
+  padding: 1px 5px;
+  font-size: 10.5px;
+  color: rgba(247, 240, 227, 0.8);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 5px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 .icon-btn,
 .insert {
   border: 0;
   cursor: pointer;
   border-radius: var(--mz-r-pill);
-  height: 32px;
-  transition: transform var(--mz-dur-fast) var(--mz-ease-out), opacity var(--mz-dur);
+  height: 34px;
+  transition:
+    transform var(--mz-dur-fast) var(--mz-ease-out),
+    opacity var(--mz-dur),
+    box-shadow var(--mz-dur) var(--mz-ease-out);
 }
 .icon-btn {
-  width: 32px;
-  background: rgba(247, 240, 227, 0.08);
+  width: 34px;
+  background: rgba(255, 255, 255, 0.07);
   color: var(--ink);
-  font-size: 13px;
+  font-size: 12px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 .insert {
-  padding: 0 16px;
-  background: var(--mz-manjal);
+  padding: 0 18px;
+  background: linear-gradient(180deg, #ffd85c, var(--mz-manjal) 55%, #e2a91c);
   color: var(--mz-mai);
-  font-weight: 700;
+  font-weight: 750;
   font-family: var(--mz-font-display);
-  box-shadow: 2px 2px 0 var(--mz-kumkum);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 6px 18px -6px rgba(244, 196, 48, 0.7);
+}
+.insert:hover:not(:disabled) {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 8px 24px -6px rgba(244, 196, 48, 0.9);
 }
 .icon-btn:active,
 .insert:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.98);
 }
 button:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: default;
+  box-shadow: none;
 }
 
-/* Hints crowd out the status on a busy footer — keep the key hints, drop them only when narrow. */
-@media (max-width: 480px) {
+/* Once the text has landed (or failed) the status needs the room more than the hints do. */
+.card[data-phase="done"] .hints,
+.card[data-phase="error"] .hints {
+  display: none;
+}
+
+/* Narrow windows keep the essentials: target, text, voice, insert. */
+@media (max-width: 500px) {
   .hints {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edge,
+  .aura,
+  .card.enter,
+  .card[data-phase="done"] .shine {
+    animation: none !important;
   }
 }

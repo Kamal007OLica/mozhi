@@ -158,7 +158,7 @@ impl Controller {
         let installed = engine::models::catalog(&self.engine.models_dir()).iter().any(|m| m.id == model_id && m.installed);
         if !installed {
             self.show_overlay(&settings);
-            self.set_phase(Phase::Error, Some("No speech model yet — download one in Mozhi → Models".into()));
+            self.set_phase(Phase::Error, Some("No speech model yet. Download one in Mozhi → Models".into()));
             let _ = self.app.emit(EV_NAVIGATE, "models");
             crate::show_main_window(&self.app);
             self.hide_later(session, LINGER_ERROR);
@@ -237,7 +237,7 @@ impl Controller {
         let mut text = result.text.trim().to_string();
         if text.is_empty() {
             self.capture.store(false, Ordering::SeqCst);
-            self.set_phase(Phase::Done, Some("Didn't catch that — try again".into()));
+            self.set_phase(Phase::Done, Some("Didn't catch that. Try again".into()));
             self.hide_later(session, LINGER_DONE);
             return;
         }
@@ -274,13 +274,13 @@ impl Controller {
                 Err(e) => {
                     log::error!("paste failed: {e:#}");
                     let _ = platform::copy_to_clipboard(&text);
-                    (false, "Couldn't paste — copied to clipboard instead".to_string())
+                    (false, "Couldn't paste, so it was copied to the clipboard".to_string())
                 }
             }
         } else {
             match platform::copy_to_clipboard(&text) {
                 Ok(()) => (false, "Copied to clipboard".to_string()),
-                Err(_) => (false, "Ready — copy it from Mozhi → History".to_string()),
+                Err(_) => (false, "Ready. Copy it from Mozhi → History".to_string()),
             }
         };
 
@@ -406,11 +406,11 @@ impl Controller {
 fn friendly_error(e: &anyhow::Error) -> String {
     let s = format!("{e:#}").to_lowercase();
     if s.contains("permission") || s.contains("not authorized") || s.contains("denied") {
-        "Microphone is blocked — allow Mozhi in Settings".into()
+        "Microphone is blocked. Allow Mozhi in Settings".into()
     } else if s.contains("device") || s.contains("no input") {
         "No microphone found".into()
     } else if s.contains("model") {
-        "Speech model failed to load — re-download it in Models".into()
+        "Speech model failed to load. Download it again in Models".into()
     } else {
         format!("Something went wrong: {e}")
     }
