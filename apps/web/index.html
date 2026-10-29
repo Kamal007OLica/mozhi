@@ -9,11 +9,39 @@
       content="Mozhi is a free, open-source Tamil voice typing app for macOS and Windows. Double-tap Control, speak Tamil, Tanglish or English, and the text lands in any app, fully on your device."
     />
     <meta name="theme-color" content="#c3161c" />
+    <meta name="author" content="Kamalraaj Senthilkumar" />
     <link rel="icon" href="/art/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="canonical" href="%SITE.url%/" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta property="og:title" content="Mozhi · மொழி · Speak Tamil. It types." />
     <meta property="og:description" content="Open-source, on-device Tamil voice typing for macOS and Windows." />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="%SITE.url%/" />
+    <meta property="og:image" content="%SITE.url%/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Mozhi: Speak Tamil. It types, in any app." />
+    <meta property="og:locale" content="en_IN" />
+    <meta property="og:locale:alternate" content="ta_IN" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Mozhi",
+        "alternateName": "மொழி",
+        "description": "Free, open-source, on-device Tamil voice typing. Speak Tamil, Tanglish or English and the text lands in any app.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "macOS 12+, Windows 10+",
+        "inLanguage": ["ta", "en"],
+        "license": "https://www.apache.org/licenses/LICENSE-2.0",
+        "url": "%SITE.url%/",
+        "image": "%SITE.url%/og.jpg",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" },
+        "author": { "@type": "Person", "name": "Kamalraaj Senthilkumar", "alternateName": ["Saalai Meiyazhagan", "சாலை மெய்யழகன்"] }
+      }
+    </script>
     <link rel="preload" href="/fonts/AnekTamil-tamil.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
@@ -26,12 +54,14 @@
           <span class="brand__ta" lang="ta">மொழி</span>
           <span class="brand__en">Mozhi</span>
         </a>
-        <nav class="nav" aria-label="Sections">
+        <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav"><i aria-hidden="true"></i>Menu</button>
+        <nav class="nav" id="site-nav" aria-label="Sections">
           <a href="#how"><span lang="ta">எப்படி?</span><small>How</small></a>
           <a href="#modes"><span lang="ta">மூன்று வழி</span><small>Modes</small></a>
           <a href="#privacy"><span lang="ta">தனியுரிமை</span><small>Privacy</small></a>
           <a href="#story"><span lang="ta">ஃ கதை</span><small>Story</small></a>
           <a href="#models"><span lang="ta">மாடல்கள்</span><small>Models</small></a>
+          <a href="#maker"><span lang="ta">உருவாக்கம்</span><small>Maker</small></a>
           <a href="#faq"><span lang="ta">கேள்விகள்</span><small>FAQ</small></a>
         </nav>
         <a class="btn btn--ghost btn--sm" href="%SITE.repo%" rel="noopener">GitHub</a>
@@ -104,26 +134,47 @@
 
               <div class="pill" data-demo="overlay" data-phase="hidden" aria-hidden="true">
                 <div class="pill__head">
-                  <span class="pill__app">
-                    <i class="pill__icon" data-demo="icon">S</i>
-                    <b data-demo="app">Slack</b>
-                    <span class="pill__field" data-demo="field">#general · message</span>
+                  <i class="pill__icon" data-demo="icon">S</i>
+                  <span class="pill__target">
+                    <small>Typing into</small>
+                    <span><b data-demo="app">Slack</b><span class="pill__field" data-demo="field">#general · message</span></span>
                   </span>
                   <span class="pill__mode" data-demo="mode">தமிழ்</span>
                 </div>
                 <p class="pill__text" data-demo="text" lang="ta"></p>
                 <div class="pill__foot">
                   <svg class="aytham" data-demo="dots" viewBox="-36 -24 72 48" width="72" height="48"></svg>
-                  <span class="pill__status" data-demo="status"></span>
-                  <span class="pill__hint"><kbd>⌃⌃</kbd> <kbd>↵</kbd> <span lang="ta">சேர்</span> · <kbd>esc</kbd></span>
+                  <span class="pill__status">
+                    <b lang="ta" data-demo="status-ta"></b>
+                    <small data-demo="status-en"></small>
+                  </span>
+                  <span class="pill__keys">
+                    <span><kbd>⌃⌃</kbd>insert</span>
+                    <span><kbd>esc</kbd>cancel</span>
+                  </span>
                 </div>
               </div>
             </div>
             <p class="demo__gloss" data-demo="gloss" aria-hidden="true"><span>In English</span><span data-demo="glosstext"></span></p>
           </div>
         </div>
+        <div class="wrap">
+          <ul class="facts" role="list">
+            <li><b>0</b><span>bytes of your voice uploaded, ever</span></li>
+            <li><b>2</b><span>taps of Control to start and to insert</span></li>
+            <li><b>3</b><span>ways to write: <span lang="ta">தமிழ்</span>, Tanglish, English</span></li>
+            <li><b>₹0</b><span>free and open source, Apache-2.0</span></li>
+          </ul>
+        </div>
         <div class="band band--kodi" aria-hidden="true"></div>
       </section>
+
+      <div class="kalvettu" role="img" aria-label="The Tamil alphabet: twelve vowels, the āytham ஃ, and eighteen consonants">
+        <div class="kalvettu__track" aria-hidden="true">
+          <div class="kalvettu__set"><figure><span lang="ta">அ</span><small>a</small></figure><figure><span lang="ta">ஆ</span><small>aa</small></figure><figure><span lang="ta">இ</span><small>i</small></figure><figure><span lang="ta">ஈ</span><small>ii</small></figure><figure><span lang="ta">உ</span><small>u</small></figure><figure><span lang="ta">ஊ</span><small>uu</small></figure><figure><span lang="ta">எ</span><small>e</small></figure><figure><span lang="ta">ஏ</span><small>ee</small></figure><figure><span lang="ta">ஐ</span><small>ai</small></figure><figure><span lang="ta">ஒ</span><small>o</small></figure><figure><span lang="ta">ஓ</span><small>oo</small></figure><figure><span lang="ta">ஔ</span><small>au</small></figure><i></i><figure class="is-key"><span lang="ta">ஃ</span><small>akh</small></figure><i></i><figure><span lang="ta">க</span><small>ka</small></figure><figure><span lang="ta">ங</span><small>nga</small></figure><figure><span lang="ta">ச</span><small>cha</small></figure><figure><span lang="ta">ஞ</span><small>nja</small></figure><figure><span lang="ta">ட</span><small>Ta</small></figure><figure><span lang="ta">ண</span><small>Na</small></figure><figure><span lang="ta">த</span><small>tha</small></figure><figure><span lang="ta">ந</span><small>na</small></figure><figure><span lang="ta">ப</span><small>pa</small></figure><figure><span lang="ta">ம</span><small>ma</small></figure><figure><span lang="ta">ய</span><small>ya</small></figure><figure><span lang="ta">ர</span><small>ra</small></figure><figure><span lang="ta">ல</span><small>la</small></figure><figure><span lang="ta">வ</span><small>va</small></figure><figure class="is-key"><span lang="ta">ழ</span><small>zha</small></figure><figure><span lang="ta">ள</span><small>La</small></figure><figure><span lang="ta">ற</span><small>Ra</small></figure><figure><span lang="ta">ன</span><small>na</small></figure><i></i></div>
+          <div class="kalvettu__set"><figure><span lang="ta">அ</span><small>a</small></figure><figure><span lang="ta">ஆ</span><small>aa</small></figure><figure><span lang="ta">இ</span><small>i</small></figure><figure><span lang="ta">ஈ</span><small>ii</small></figure><figure><span lang="ta">உ</span><small>u</small></figure><figure><span lang="ta">ஊ</span><small>uu</small></figure><figure><span lang="ta">எ</span><small>e</small></figure><figure><span lang="ta">ஏ</span><small>ee</small></figure><figure><span lang="ta">ஐ</span><small>ai</small></figure><figure><span lang="ta">ஒ</span><small>o</small></figure><figure><span lang="ta">ஓ</span><small>oo</small></figure><figure><span lang="ta">ஔ</span><small>au</small></figure><i></i><figure class="is-key"><span lang="ta">ஃ</span><small>akh</small></figure><i></i><figure><span lang="ta">க</span><small>ka</small></figure><figure><span lang="ta">ங</span><small>nga</small></figure><figure><span lang="ta">ச</span><small>cha</small></figure><figure><span lang="ta">ஞ</span><small>nja</small></figure><figure><span lang="ta">ட</span><small>Ta</small></figure><figure><span lang="ta">ண</span><small>Na</small></figure><figure><span lang="ta">த</span><small>tha</small></figure><figure><span lang="ta">ந</span><small>na</small></figure><figure><span lang="ta">ப</span><small>pa</small></figure><figure><span lang="ta">ம</span><small>ma</small></figure><figure><span lang="ta">ய</span><small>ya</small></figure><figure><span lang="ta">ர</span><small>ra</small></figure><figure><span lang="ta">ல</span><small>la</small></figure><figure><span lang="ta">வ</span><small>va</small></figure><figure class="is-key"><span lang="ta">ழ</span><small>zha</small></figure><figure><span lang="ta">ள</span><small>La</small></figure><figure><span lang="ta">ற</span><small>Ra</small></figure><figure><span lang="ta">ன</span><small>na</small></figure><i></i></div>
+        </div>
+      </div>
 
       <!-- ── 2 · How it works ─────────────────────────────────── -->
       <section class="how paper" id="how" aria-labelledby="how-title">
@@ -188,13 +239,11 @@
             <article class="mode-card">
               <header><span class="mode-card__tag" lang="ta">தமிழ்</span><span>Tamil script</span></header>
               <p class="mode-card__out" lang="ta">நாளைக்கு மீட்டிங்கை பத்து மணிக்கு வெச்சுக்கலாமா?</p>
-              <p class="gloss gloss--card">The same sentence, in Tamil letters.</p>
               <p class="mode-card__note">Turn on local polish and English words you say stay English: <span lang="ta">meeting-அ</span>.</p>
             </article>
             <article class="mode-card mode-card--feature">
               <header><span class="mode-card__tag">Tanglish</span><span lang="ta">தங்கிலிஷ்</span></header>
               <p class="mode-card__out">Naalaikku meeting-a pathu manikku vechukkalaamaa?</p>
-              <p class="gloss gloss--card">The same Tamil words, spelled in English letters.</p>
               <p class="mode-card__note">Tamil, in the Latin letters you already type on WhatsApp.</p>
             </article>
             <article class="mode-card">
@@ -396,11 +445,51 @@ npm run desktop:dev
         </div>
       </section>
 
-      <!-- ── 8 · FAQ ──────────────────────────────────────────── -->
+      <!-- ── 8 · Creator ──────────────────────────────────────── -->
+      <section class="maker red grain" id="maker" aria-labelledby="maker-title">
+        <img class="maker__kolam" src="/art/kolam-hero.svg" width="439" height="439" alt="" loading="lazy" />
+        <div class="wrap maker__grid">
+          <figure class="portrait">
+            <img src="/creator.jpg" width="200" height="200" alt="Portrait of Kamalraaj Senthilkumar, fondly called Saalai Meiyazhagan" loading="lazy" />
+            <img class="portrait__mark" src="/art/aytham-kumkum.svg" width="28" height="28" alt="" />
+            <figcaption><span lang="ta">உருவாக்கியவர்</span> CREATOR · 2026</figcaption>
+          </figure>
+          <div class="maker__copy">
+            <p class="kicker">௬ · Made with love</p>
+            <h2 id="maker-title">
+              <span lang="ta">அன்னைத் தமிழுக்கு ஒரு சிறு காணிக்கை.</span>
+              <small>A small offering to Mother Tamil.</small>
+            </h2>
+            <p class="maker__why" lang="ta">
+              தமிழ் பேசுறவங்க, தங்க சொந்த மொழியில, தங்க சொந்தக் கணினியிலேயே பேசி எழுதணும். அதுக்காகத்தான் மொழி.
+            </p>
+            <p class="gloss">
+              Tamil speakers should be able to write by voice in their own language, on their own computer. That's why Mozhi
+              exists.
+            </p>
+            <p>
+              Mozhi is free and open source, with no account and no cloud. Its look comes from the kolam on the doorstep and
+              the Chola temples of a thousand years ago. If it helps you, a star, a bug report or a dialect test helps it back.
+            </p>
+            <div class="signature">
+              <p class="signature__ta" lang="ta">கமல்ராஜ் செந்தில்குமார்</p>
+              <p class="signature__en">Kamalraaj Senthilkumar <span>Creator of Mozhi</span></p>
+              <p class="signature__aka">
+                fondly called <b lang="ta">சாலை மெய்யழகன்</b> <i>Saalai Meiyazhagan</i>
+              </p>
+            </div>
+            <div class="maker__cta">
+              <a class="btn btn--manjal" href="%SITE.repo%" rel="noopener">★ Star Mozhi on GitHub</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 9 · FAQ ──────────────────────────────────────────── -->
       <section class="faq paper" id="faq" aria-labelledby="faq-title">
         <div class="wrap faq__wrap">
           <header class="sec-head">
-            <p class="kicker">௬ · Questions</p>
+            <p class="kicker">௭ · Questions</p>
             <h2 id="faq-title"><span lang="ta">கேள்விகள்</span><small>Questions, answered.</small></h2>
           </header>
           <div class="qa">
@@ -474,7 +563,7 @@ npm run desktop:dev
           </nav>
         </div>
         <p class="foot__small">
-          Apache-2.0 · Speech recognition by whisper.cpp (MIT) running OpenAI Whisper models (MIT) · Made for Tamil speakers everywhere ·
+          Created by Kamalraaj Senthilkumar (<span lang="ta">சாலை மெய்யழகன்</span>), for Mother Tamil · Apache-2.0 · Speech recognition by whisper.cpp (MIT) running OpenAI Whisper models (MIT) · Made for Tamil speakers everywhere ·
           <span lang="ta">தமிழ் வாழ்க</span> (long live Tamil)
         </p>
       </div>

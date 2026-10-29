@@ -1,0 +1,13 @@
+{
+  "name": "Mozhi · மொழி",
+  "short_name": "Mozhi",
+  "description": "Open-source, on-device Tamil voice typing.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#c3161c",
+  "theme_color": "#c3161c",
+  "icons": [
+    { "src": "/art/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

@@ -17,5 +17,10 @@ function siteLinks(): Plugin {
 export default defineConfig({
   plugins: [siteLinks()],
   server: { port: 4321 },
-  build: { target: "es2020", cssMinify: true, assetsInlineLimit: 0 },
+  build: {
+    target: "es2020",
+    cssMinify: true,
+    assetsInlineLimit: 0,
+    rollupOptions: { input: { main: "index.html", notFound: "404.html" } },
+  },
 });

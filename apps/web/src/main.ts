@@ -18,7 +18,6 @@ interface Scene {
   words: string[];
   /** What the dictated sentence means, for readers who don't read Tamil. */
   gloss?: string;
-  done: string;
 }
 
 const SCENES: Scene[] = [
@@ -33,7 +32,6 @@ const SCENES: Scene[] = [
     thread: [["Priya", "நாளைக்கு standup எப்போ வெக்கலாம்?", "ta", "When shall we do standup tomorrow?"]],
     words: ["நாளைக்கு", "காலையில", "meeting-அ", "பத்து", "மணிக்கு", "வெச்சுக்கலாமா?"],
     gloss: "Shall we keep the meeting at ten tomorrow morning?",
-    done: "Slack-இல் சேர்த்தாச்சு · Inserted into Slack",
   },
   {
     app: "WhatsApp",
@@ -46,7 +44,6 @@ const SCENES: Scene[] = [
     thread: [["Amma", "Eppo da varuva? 🙂", "en", "When are you coming, dear?"]],
     words: ["Amma,", "naan", "Sunday", "kaalaila", "Chennai-ku", "varen.", "Ticket", "book", "pannitten."],
     gloss: "Mum, I'm coming to Chennai on Sunday morning. I've booked the ticket.",
-    done: "WhatsApp-இல் சேர்த்தாச்சு · Inserted into WhatsApp",
   },
   {
     app: "Notes",
@@ -58,7 +55,6 @@ const SCENES: Scene[] = [
     lang: "en",
     thread: [["Notes", "Day 2:", "en"]],
     words: ["Visit", "the", "Big", "Temple", "before", "sunset", "and", "photograph", "the", "inscriptions."],
-    done: "Notes-இல் சேர்த்தாச்சு · Inserted into Notes",
   },
 ];
 
@@ -85,7 +81,8 @@ function runDemo(root: HTMLElement) {
     field: $(root, "field"),
     mode: $(root, "mode"),
     text: $(root, "text"),
-    status: $(root, "status"),
+    statusTa: $(root, "status-ta"),
+    statusEn: $(root, "status-en"),
   };
   const dots = new AythamDots(root.querySelector<SVGSVGElement>('[data-demo="dots"]')!);
 
@@ -126,9 +123,10 @@ function runDemo(root: HTMLElement) {
   };
   requestAnimationFrame(voice);
 
-  const setPhase = (phase: DotPhase | "hidden", status = "") => {
+  const setPhase = (phase: DotPhase | "hidden", ta = "", en = "") => {
     ui.overlay.dataset.phase = phase;
-    ui.status.textContent = status;
+    ui.statusTa.textContent = ta;
+    ui.statusEn.textContent = en;
     if (phase !== "hidden") dots.setPhase(phase);
   };
 
@@ -177,7 +175,7 @@ function runDemo(root: HTMLElement) {
     await wait(900);
 
     await tap();
-    setPhase("listening", "கேட்கிறேன்… listening");
+    setPhase("listening", "கேட்கிறேன்…", "Listening");
     ui.gloss.classList.toggle("is-on", Boolean(scene.gloss));
     await wait(450);
 
@@ -191,13 +189,13 @@ function runDemo(root: HTMLElement) {
     await wait(500);
 
     await tap();
-    setPhase("transcribing", "எழுதுகிறேன்… writing");
+    setPhase("transcribing", "எழுதுகிறேன்…", "Writing it down");
     await wait(1250);
 
     ui.composed.textContent = ui.text.textContent;
     ui.composed.lang = scene.lang;
     ui.composer.classList.add("is-filled");
-    setPhase("done", `✓ ${scene.done}`);
+    setPhase("done", "சேர்த்தாச்சு ✓", `Inserted into ${scene.app}`);
     await wait(1500);
 
     setPhase("hidden");
@@ -251,6 +249,91 @@ function preferOs() {
   w.classList.replace("btn--paper", "btn--manjal");
   w.after(mac);
 }
+
+// ── Mobile menu ──
+function menu() {
+  const btn = document.querySelector<HTMLButtonElement>(".menu-btn");
+  const nav = document.getElementById("site-nav");
+  if (!btn || !nav) return;
+  const set = (open: boolean) => {
+    btn.setAttribute("aria-expanded", String(open));
+    nav.classList.toggle("is-open", open);
+  };
+  btn.addEventListener("click", () => set(btn.getAttribute("aria-expanded") !== "true"));
+  nav.addEventListener("click", (e) => {
+    if ((e.target as HTMLElement).closest("a")) set(false);
+  });
+  let openedAt = 0;
+  btn.addEventListener("click", () => (openedAt = scrollY));
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (nav.classList.contains("is-open") && Math.abs(scrollY - openedAt) > 60) set(false);
+    },
+    { passive: true },
+  );
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && nav.classList.contains("is-open")) {
+      set(false);
+      btn.focus();
+    }
+  });
+}
+
+// ── Highlight the section in view ──
+function activeSection() {
+  const links = new Map<string, HTMLAnchorElement>();
+  document.querySelectorAll<HTMLAnchorElement>('.nav a[href^="#"]').forEach((a) => links.set(a.hash.slice(1), a));
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        links.forEach((a) => a.removeAttribute("aria-current"));
+        links.get(e.target.id)?.setAttribute("aria-current", "true");
+      }
+    },
+    { rootMargin: "-45% 0px -50% 0px" },
+  );
+  links.forEach((_, id) => {
+    const el = document.getElementById(id);
+    if (el) io.observe(el);
+  });
+}
+
+// ── Scroll reveal: content is visible without JS; this only adds the entrance ──
+function reveal() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const groups = [".sec-head", ".steps", ".callout", ".said", ".mode-cards", ".privacy__copy", ".receipt", ".poster", ".tales", ".temple", ".stamps", ".oss__grid", ".portrait", ".maker__copy", ".qa", ".kural"];
+  const targets: HTMLElement[] = [];
+  for (const sel of groups) {
+    document.querySelectorAll<HTMLElement>(sel).forEach((el) => {
+      // Lists reveal child by child; everything else as one block.
+      const kids = el.matches(".steps, .mode-cards, .tales, .stamps") ? [...el.children] : [el];
+      kids.forEach((k, i) => {
+        const h = k as HTMLElement;
+        h.classList.add("reveal");
+        h.style.transitionDelay = `${Math.min(i, 5) * 80}ms`;
+        targets.push(h);
+      });
+    });
+  }
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          e.target.classList.add("is-in");
+          io.unobserve(e.target);
+        }
+      }
+    },
+    { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+  );
+  targets.forEach((t) => io.observe(t));
+}
+
+menu();
+activeSection();
+reveal();
 
 const demo = document.getElementById("demo");
 if (demo) runDemo(demo);

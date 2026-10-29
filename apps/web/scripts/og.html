@@ -1,0 +1,45 @@
+<!doctype html>
+<!-- Social share card (1200×630). Rendered to public/og.jpg by scripts/og.sh. -->
+<html lang="ta">
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face { font-family: "Anek Tamil"; font-weight: 100 800; font-stretch: 75% 125%; src: url(../public/fonts/AnekTamil-tamil.woff2); unicode-range: U+0B82-0BFA, U+200C-200D; }
+  @font-face { font-family: "Anek Latin"; font-weight: 100 800; font-stretch: 75% 125%; src: url(../public/fonts/AnekLatin-latin.woff2); }
+  @font-face { font-family: "JetBrains Mono"; src: url(../public/fonts/JetBrainsMono-latin.woff2); }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    position: relative; isolation: isolate; background: #c3161c; color: #f7f0e3;
+    font-family: "Anek Latin", "Anek Tamil", sans-serif;
+  }
+  body::after {
+    content: ""; position: absolute; inset: 0; z-index: -1; mix-blend-mode: multiply; opacity: .55;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .vimana { position: absolute; z-index: -1; right: 40px; bottom: 40px; height: 600px; image-rendering: pixelated; }
+  .kolam { position: absolute; z-index: -1; left: -120px; top: -140px; width: 520px; opacity: .14; }
+  .band { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: #6b0a0e url(../public/art/band-kodi.svg) 0 50% / 96px 40px repeat-x; }
+  .copy { position: absolute; left: 72px; top: 64px; }
+  .brand { display: flex; align-items: center; gap: 14px; font: 600 15px/1 "JetBrains Mono", monospace; letter-spacing: .2em; color: #f9dc7c; }
+  .brand img { width: 44px; height: 44px; border-radius: 11px; box-shadow: 3px 3px 0 #17110e; }
+  h1 { margin-top: 18px; font: 800 210px/1.02 "Anek Tamil"; font-stretch: 75%; text-shadow: 9px 9px 0 #6b0a0e; }
+  h1 em { font-style: normal; color: #f4c430; }
+  .tag { font: 800 60px/1.2 "Anek Tamil"; font-stretch: 75%; color: #f4c430; }
+  .en { margin-top: 8px; font: 600 30px/1.3 "Anek Latin"; }
+  .meta { margin-top: 16px; font: 500 17px/1.4 "JetBrains Mono", monospace; color: #efe4cf; }
+</style>
+</head>
+<body>
+  <img class="kolam" src="../public/art/kolam-hero.svg" alt="" />
+  <img class="vimana" src="../public/art/vimana-arakku.svg" alt="" />
+  <div class="copy">
+    <p class="brand"><img src="../public/art/mark.svg" alt="" /> OPEN SOURCE · ON-DEVICE · FREE</p>
+    <h1>மொ<em>ழி</em></h1>
+    <p class="tag">பேசுங்க. எழுத்தாகும்.</p>
+    <p class="en">Speak Tamil. It types, in any app.</p>
+    <p class="meta">Tamil · Tanglish · English &nbsp;·&nbsp; macOS &amp; Windows &nbsp;·&nbsp; 100% offline</p>
+  </div>
+  <div class="band"></div>
+</body>
+</html>
