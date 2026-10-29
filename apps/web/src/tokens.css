@@ -1,0 +1,93 @@
+/* Copied from brand/tokens.css by scripts/art.py; edit the original. */
+/*
+ * Mozhi · மொழி — design tokens
+ * Single source of truth for the brand book, desktop app and landing page.
+ * Import fonts.css alongside this file (self-hosted, works offline).
+ */
+:root {
+  /* ── Colour · named after things you find in a Tamil home and temple ── */
+  --mz-kumkum: #c3161c;      /* vermilion — the primary ground */
+  --mz-kumkum-700: #9c1015;
+  --mz-arakku: #6b0a0e;      /* lac / sealing wax — deep red */
+  --mz-kumkum-300: #e5574f;
+  --mz-manjal: #f4c430;      /* turmeric — the voice, the dots */
+  --mz-manjal-700: #c4960f;
+  --mz-manjal-300: #f9dc7c;
+  --mz-manjal-100: #fdf3cf;
+  --mz-olai: #efe4cf;        /* palm-leaf manuscript */
+  --mz-paper: #f7f0e3;
+  --mz-chandanam: #e3cfae;   /* sandalwood */
+  --mz-mai: #17110e;         /* lamp-black ink */
+  --mz-mai-80: #2a211c;
+  --mz-karungal: #4a3f38;    /* temple granite */
+  --mz-stone: #8a7d71;
+  --mz-pachai: #2f7d4f;      /* banana leaf — success */
+  --mz-mayil: #0e5e5a;       /* peacock — focus / links on paper */
+
+  /* Semantic */
+  --mz-bg: var(--mz-paper);
+  --mz-surface: #fffaf0;
+  --mz-ink: var(--mz-mai);
+  --mz-ink-muted: var(--mz-karungal);
+  --mz-ink-faint: var(--mz-stone);
+  --mz-line: rgba(23, 17, 14, 0.14);
+  --mz-accent: var(--mz-kumkum);
+  --mz-voice: var(--mz-manjal);
+  --mz-focus: var(--mz-mayil);
+  --mz-danger: var(--mz-kumkum-700);
+
+  /* ── Type ── */
+  --mz-font-display: "Anek Tamil", "Anek Latin", "Tamil Sangam MN", "Nirmala UI", system-ui, sans-serif;
+  --mz-font-ui: "Anek Latin", "Anek Tamil", "Tamil Sangam MN", "Nirmala UI", system-ui, sans-serif;
+  --mz-font-serif: "Tiro Tamil", "Tamil MN", "Latha", Georgia, serif;
+  --mz-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --mz-text-xs: 0.75rem;
+  --mz-text-sm: 0.875rem;
+  --mz-text-md: 1rem;
+  --mz-text-lg: 1.25rem;
+  --mz-text-xl: 1.5rem;
+  --mz-text-2xl: 2rem;
+  --mz-text-3xl: 3rem;
+  --mz-text-4xl: 4.5rem;
+  --mz-text-5xl: 7rem;
+
+  /* Anek's width axis: 75 = condensed poster (Manjapai), 100 = UI */
+  --mz-wdth-poster: 75;
+  --mz-wdth-ui: 100;
+
+  /* ── Space · 4px base ── */
+  --mz-1: 4px;  --mz-2: 8px;  --mz-3: 12px; --mz-4: 16px;
+  --mz-5: 24px; --mz-6: 32px; --mz-7: 48px; --mz-8: 64px; --mz-9: 96px;
+
+  /* ── Shape ── */
+  --mz-r-sm: 6px;
+  --mz-r-md: 12px;
+  --mz-r-lg: 20px;
+  --mz-r-xl: 28px;
+  --mz-r-pill: 999px;
+  --mz-print: 4px 4px 0 var(--mz-mai);       /* block-print offset shadow */
+  --mz-print-sm: 2px 2px 0 var(--mz-mai);
+  --mz-float: 0 18px 50px -12px rgba(23, 17, 14, 0.45), 0 2px 6px rgba(23, 17, 14, 0.2);
+
+  /* ── Motion ── */
+  --mz-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --mz-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --mz-ease-in: cubic-bezier(0.64, 0, 0.78, 0);
+  --mz-dur-fast: 120ms;
+  --mz-dur: 220ms;
+  --mz-dur-slow: 420ms;
+
+  /* ── Texture · canvas grain used on every red surface ── */
+  --mz-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --mz-halftone: radial-gradient(circle at center, rgba(23, 17, 14, 0.22) 1.1px, transparent 1.6px);
+  --mz-kaavi: repeating-linear-gradient(90deg, var(--mz-kumkum) 0 22px, var(--mz-paper) 22px 44px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mz-dur-fast: 0ms;
+    --mz-dur: 0ms;
+    --mz-dur-slow: 0ms;
+  }
+}

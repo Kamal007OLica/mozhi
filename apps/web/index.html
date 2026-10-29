@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Mozhi · மொழி · Speak Tamil. It types.</title>
+    <meta
+      name="description"
+      content="Mozhi is a free, open-source Tamil voice typing app for macOS and Windows. Double-tap Control, speak Tamil, Tanglish or English, and the text lands in any app, fully on your device."
+    />
+    <meta name="theme-color" content="#c3161c" />
+    <link rel="icon" href="/art/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:title" content="Mozhi · மொழி · Speak Tamil. It types." />
+    <meta property="og:description" content="Open-source, on-device Tamil voice typing for macOS and Windows." />
+    <meta property="og:type" content="website" />
+    <link rel="preload" href="/fonts/AnekTamil-tamil.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="topbar" role="banner">
+      <div class="wrap topbar__in">
+        <a class="brand" href="#top" aria-label="Mozhi home">
+          <img src="/art/mark.svg" width="34" height="34" alt="" />
+          <span class="brand__ta" lang="ta">மொழி</span>
+          <span class="brand__en">Mozhi</span>
+        </a>
+        <nav class="nav" aria-label="Sections">
+          <a href="#how"><span lang="ta">எப்படி?</span><small>How</small></a>
+          <a href="#modes"><span lang="ta">மூன்று வழி</span><small>Modes</small></a>
+          <a href="#privacy"><span lang="ta">தனியுரிமை</span><small>Privacy</small></a>
+          <a href="#story"><span lang="ta">ஃ கதை</span><small>Story</small></a>
+          <a href="#models"><span lang="ta">மாடல்கள்</span><small>Models</small></a>
+          <a href="#faq"><span lang="ta">கேள்விகள்</span><small>FAQ</small></a>
+        </nav>
+        <a class="btn btn--ghost btn--sm" href="%SITE.repo%" rel="noopener">GitHub</a>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- ── 1 · Hero ─────────────────────────────────────────── -->
+      <section class="hero red grain" id="top" aria-labelledby="hero-title">
+        <img class="hero__vimana" src="/art/vimana-arakku.svg" width="410" height="830" alt="" />
+        <img class="hero__kolam" src="/art/kolam-hero.svg" width="439" height="439" alt="" />
+        <div class="wrap hero__grid">
+          <div class="hero__copy">
+            <p class="eyebrow">
+              <span lang="ta">திறந்த மூலம் · உங்கள் கணினியிலேயே</span>
+              <span>Open source · On-device · Free</span>
+            </p>
+            <h1 class="hero__title" id="hero-title">
+              <span class="wordmark" lang="ta" aria-hidden="true">மொ<em>ழி</em></span>
+              <span class="sr-only">Mozhi, மொழி</span>
+            </h1>
+            <p class="hero__meaning"><b>mozhi</b> <span>/mo·zhi/</span> <i>n.</i> Tamil for “language”, the spoken word.</p>
+            <p class="hero__tag" lang="ta">பேசுங்க. எழுத்தாகும்.</p>
+            <p class="hero__tag-en">Speak Tamil. It types into any app, entirely on your computer.</p>
+            <p class="hero__lede" lang="ta">
+              Control-ஐ இரண்டு முறை தட்டுங்க, பேசுங்க. தமிழ், Tanglish, English, எப்படிப் பேசினாலும், நீங்க
+              இருக்கிற app-லயே எழுத்தா வந்து சேரும்.
+            </p>
+            <p class="gloss gloss--hero">
+              Double-tap Control and start talking. Tamil, Tanglish or English: however you speak, it arrives as text in the
+              app you're already in.
+            </p>
+            <div class="hero__cta">
+              <a class="btn btn--manjal" href="%SITE.releases%" data-os="mac" rel="noopener">
+                <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.5 2-3.6-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.8-3.5.8-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.6ZM14.1 5.6c.6-.8 1.1-1.8 1-2.9-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.8 1 .1 2.1-.5 2.7-1.3Z"/></svg>
+                <span><b lang="ta">macOS-க்கு</b> Download for Mac</span>
+              </a>
+              <a class="btn btn--paper" href="%SITE.releases%" data-os="win" rel="noopener">
+                <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 5.5 10.4 4.5v7H3v-6Zm0 13 7.4 1v-7H3v6Zm8.3 1.2L21 21v-8.5h-9.7v7.2Zm0-15.4v7.2H21V3l-9.7 1.3Z"/></svg>
+                <span><b lang="ta">Windows-க்கு</b> Download for Windows</span>
+              </a>
+            </div>
+            <p class="hero__meta">
+              <a href="%SITE.repo%" rel="noopener">View source</a>
+              <span>v%SITE.version% · Apache-2.0 · macOS 12+ · Windows 10+ · <span lang="ta">இணையம் தேவையில்லை</span> / works offline</span>
+            </p>
+          </div>
+
+          <div class="hero__demo">
+            <div class="demo" id="demo">
+              <p class="sr-only">
+                Animated demo: Control is double-tapped, the Mozhi pill names the app it will type into, Tamil words appear as
+                they are spoken, and the finished sentence is inserted into that app.
+              </p>
+              <div class="win" aria-hidden="true">
+                <div class="win__bar">
+                  <span class="win__lights"><i></i><i></i><i></i></span>
+                  <span class="win__title" data-demo="title">Slack · #general</span>
+                </div>
+                <div class="win__body">
+                  <div class="thread" data-demo="thread"></div>
+                  <div class="composer" data-demo="composer"><span class="composer__text" data-demo="composed"></span><span class="caret"></span></div>
+                </div>
+              </div>
+
+              <div class="keys" aria-hidden="true">
+                <kbd class="key" data-demo="key">⌃</kbd>
+                <span class="keys__label" data-demo="keylabel">control</span>
+              </div>
+
+              <div class="pill" data-demo="overlay" data-phase="hidden" aria-hidden="true">
+                <div class="pill__head">
+                  <span class="pill__app">
+                    <i class="pill__icon" data-demo="icon">S</i>
+                    <b data-demo="app">Slack</b>
+                    <span class="pill__field" data-demo="field">#general · message</span>
+                  </span>
+                  <span class="pill__mode" data-demo="mode">தமிழ்</span>
+                </div>
+                <p class="pill__text" data-demo="text" lang="ta"></p>
+                <div class="pill__foot">
+                  <svg class="aytham" data-demo="dots" viewBox="-36 -24 72 48" width="72" height="48"></svg>
+                  <span class="pill__status" data-demo="status"></span>
+                  <span class="pill__hint"><kbd>⌃⌃</kbd> <kbd>↵</kbd> <span lang="ta">சேர்</span> · <kbd>esc</kbd></span>
+                </div>
+              </div>
+            </div>
+            <p class="demo__gloss" data-demo="gloss" aria-hidden="true"><span>In English</span><span data-demo="glosstext"></span></p>
+          </div>
+        </div>
+        <div class="band band--kodi" aria-hidden="true"></div>
+      </section>
+
+      <!-- ── 2 · How it works ─────────────────────────────────── -->
+      <section class="how paper" id="how" aria-labelledby="how-title">
+        <div class="wrap">
+          <header class="sec-head">
+            <p class="kicker">௧ · How it works</p>
+            <h2 id="how-title"><span lang="ta">மூன்று அடி. அவ்வளவுதான்.</span><small>Three steps. That's it.</small></h2>
+          </header>
+          <ol class="steps">
+            <li class="step">
+              <span class="step__num" lang="ta" aria-hidden="true">௧</span>
+              <div class="step__keys" aria-hidden="true"><kbd>⌃</kbd><kbd>⌃</kbd></div>
+              <h3><span lang="ta">இரண்டு முறை தட்டுங்க</span><small>Double-tap Control</small></h3>
+              <p>The <span lang="ta">ஃ</span> pill appears at the bottom of your screen and starts listening. On Windows it's <kbd>Ctrl</kbd> <kbd>Ctrl</kbd>.</p>
+            </li>
+            <li class="step">
+              <span class="step__num" lang="ta" aria-hidden="true">௨</span>
+              <div class="step__wave" aria-hidden="true"><i></i><i></i><i></i></div>
+              <h3><span lang="ta">பேசுங்க</span><small>Just talk</small></h3>
+              <p>Tamil, Tanglish, English, or all three in one sentence. Your words appear in the pill as you speak.</p>
+            </li>
+            <li class="step">
+              <span class="step__num" lang="ta" aria-hidden="true">௩</span>
+              <div class="step__keys" aria-hidden="true"><kbd>⌃</kbd><kbd>⌃</kbd><span>/</span><kbd>↵</kbd></div>
+              <h3><span lang="ta">சேர்த்திடுங்க</span><small>Drop it in</small></h3>
+              <p>Double-tap again or press Enter. The text lands exactly where your cursor is. <kbd>Esc</kbd> throws it away.</p>
+            </li>
+          </ol>
+
+          <div class="callout">
+            <div class="callout__chip" aria-hidden="true">
+              <span class="chip-target"><i>W</i><b>WhatsApp</b><span>Amma · message</span></span>
+              <span class="chip-arrow">→</span>
+              <span class="chip-target chip-target--alt"><i>N</i><b>Notes</b><span>Shopping list</span></span>
+            </div>
+            <div>
+              <h3><span lang="ta">எந்த app-ல எழுதப் போகுதுன்னு எப்பவும் தெரியும்.</span><small>It always shows where it will type.</small></h3>
+              <p>
+                Before anything is pasted, the pill names the app you're in, and the field when it can tell. Switch apps
+                mid-sentence and it follows you. Your words never land in the wrong window.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 3 · Modes ────────────────────────────────────────── -->
+      <section class="modes ink" id="modes" aria-labelledby="modes-title">
+        <div class="wrap">
+          <header class="sec-head sec-head--light">
+            <p class="kicker">௨ · Three ways to write</p>
+            <h2 id="modes-title"><span lang="ta">ஒரே குரல். மூன்று எழுத்து.</span><small>One voice. Three ways to write it.</small></h2>
+          </header>
+
+          <figure class="said">
+            <figcaption>You say</figcaption>
+            <blockquote lang="ta">“நாளைக்கு meeting-அ பத்து மணிக்கு வெச்சுக்கலாமா?”</blockquote>
+            <p class="gloss">Meaning: “Shall we keep tomorrow's meeting at ten?” Here's that one sentence, written three ways.</p>
+          </figure>
+
+          <div class="mode-cards">
+            <article class="mode-card">
+              <header><span class="mode-card__tag" lang="ta">தமிழ்</span><span>Tamil script</span></header>
+              <p class="mode-card__out" lang="ta">நாளைக்கு மீட்டிங்கை பத்து மணிக்கு வெச்சுக்கலாமா?</p>
+              <p class="gloss gloss--card">The same sentence, in Tamil letters.</p>
+              <p class="mode-card__note">Turn on local polish and English words you say stay English: <span lang="ta">meeting-அ</span>.</p>
+            </article>
+            <article class="mode-card mode-card--feature">
+              <header><span class="mode-card__tag">Tanglish</span><span lang="ta">தங்கிலிஷ்</span></header>
+              <p class="mode-card__out">Naalaikku meeting-a pathu manikku vechukkalaamaa?</p>
+              <p class="gloss gloss--card">The same Tamil words, spelled in English letters.</p>
+              <p class="mode-card__note">Tamil, in the Latin letters you already type on WhatsApp.</p>
+            </article>
+            <article class="mode-card">
+              <header><span class="mode-card__tag">English</span><span lang="ta">ஆங்கிலம்</span></header>
+              <p class="mode-card__out">Can we keep tomorrow's meeting at ten?</p>
+              <p class="mode-card__note">Say it in English, get English. Or leave Mozhi on <b>Auto</b> and it picks Tamil or English for each sentence.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 4 · Privacy ──────────────────────────────────────── -->
+      <section class="privacy red grain" id="privacy" aria-labelledby="privacy-title">
+        <div class="wrap privacy__grid">
+          <div class="privacy__copy">
+            <p class="kicker kicker--light">௩ · Private by design</p>
+            <h2 id="privacy-title"><span lang="ta">உங்க குரல், உங்க கணினியிலேயே.</span><small>Your voice never leaves your computer.</small></h2>
+            <p>
+              Mozhi runs the open Whisper speech model through <b>whisper.cpp</b>, right on your machine. On Apple Silicon it
+              uses the GPU through Metal. There is no sign-in, no server and no subscription.
+            </p>
+            <p>
+              Want tidier punctuation? Switch on <b>polish</b> and a small language model running locally through
+              <b>Ollama</b> cleans up the text. That stays on your machine too, and if it's slow or unsure, Mozhi pastes the
+              plain transcript instead.
+            </p>
+            <p>After pasting, Mozhi puts your old clipboard back.</p>
+          </div>
+
+          <article class="receipt" aria-label="Privacy charter">
+            <header class="receipt__head">
+              <span class="receipt__label">CHARTER</span>
+              <span class="receipt__no">No. 1010</span>
+            </header>
+            <p class="receipt__brand"><span lang="ta">செப்பேடு</span><small>Mozhi · copper-plate charter</small></p>
+            <p class="receipt__motto">/ Your words, your machine, your business /</p>
+            <hr />
+            <p class="receipt__date">ISSUED: EVERY DAY · ON YOUR DEVICE</p>
+            <hr />
+            <dl class="receipt__lines">
+              <div><dt>Audio uploaded</dt><dd>0 bytes</dd></div>
+              <div><dt><span lang="ta">கணக்கு</span> / Account</dt><dd>none</dd></div>
+              <div><dt>Telemetry &amp; tracking</dt><dd>none</dd></div>
+              <div><dt>Speech recognition</dt><dd>whisper.cpp</dd></div>
+              <div><dt>Polish (optional)</dt><dd>Ollama, local</dd></div>
+              <div><dt>Works offline</dt><dd><span lang="ta">ஆம்</span> · yes</dd></div>
+              <div><dt>Licence</dt><dd>Apache-2.0</dd></div>
+            </dl>
+            <hr />
+            <p class="receipt__total"><span>TOTAL:</span><span>₹0</span></p>
+            <div class="receipt__barcode" aria-hidden="true"></div>
+            <p class="receipt__thanks"><span lang="ta">நன்றி!</span><small>thank you</small></p>
+            <footer class="receipt__foot"><span>tel. ⌃⌃</span><span>MOZHI · OPEN SOURCE</span></footer>
+          </article>
+        </div>
+      </section>
+
+      <!-- ── 5 · The story of ஃ ───────────────────────────────── -->
+      <section class="story paper" id="story" aria-labelledby="story-title">
+        <div class="wrap">
+          <div class="poster">
+            <div class="poster__blob">
+              <img class="poster__glyph" src="/art/aytham-manjal.svg" width="132" height="132" alt="" />
+              <h2 id="story-title"><span lang="ta">மூன்று புள்ளி. ஒரு மொழி.</span><small>Three dots. One language.</small></h2>
+            </div>
+            <p class="poster__foot">THE STORY OF <img src="/art/aytham-manjal.svg" width="48" height="48" alt="ஃ" /></p>
+          </div>
+
+          <div class="tales">
+            <article class="tale">
+              <div class="tale__art tale__art--aytham" aria-hidden="true"><svg class="aytham aytham--big" data-story-dots viewBox="-36 -24 72 48" width="180" height="120"></svg></div>
+              <h3><span lang="ta">ஆய்தம்</span><small>Āytham</small></h3>
+              <p>
+                <span lang="ta">ஃ</span> is a letter no other script has: three dots with a sound of their own. It's our logo,
+                and it's the pill that listens to you, rising and falling with your voice.
+              </p>
+            </article>
+            <article class="tale">
+              <div class="tale__art tale__art--crowns" aria-hidden="true">
+                <figure><img src="/art/bow.svg" width="300" height="300" alt="" loading="lazy" /><figcaption><span lang="ta">வில்</span><small>Chera bow</small></figcaption></figure>
+                <figure><img src="/art/tiger.svg" width="300" height="144" alt="" loading="lazy" /><figcaption><span lang="ta">புலி</span><small>Chola tiger</small></figcaption></figure>
+                <figure><img src="/art/fish.svg" width="300" height="300" alt="" loading="lazy" /><figcaption><span lang="ta">கயல்</span><small>Pandya fish</small></figcaption></figure>
+              </div>
+              <h3><span lang="ta">மூவேந்தர்</span><small>The three crowned kings</small></h3>
+              <p>
+                The Chera bow, the Chola tiger and the Pandya fish stand for the three dynasties that carried Tamil for two
+                thousand years. Three dots, three crowns.
+              </p>
+            </article>
+            <article class="tale">
+              <div class="tale__art tale__art--kolam" aria-hidden="true"><img src="/art/kolam-kumkum.svg" width="328" height="328" alt="" loading="lazy" /></div>
+              <h3><span lang="ta">புள்ளி</span><small>Pulli</small></h3>
+              <p>
+                Every kolam starts as a grid of dots on the doorstep at dawn, and then one unbroken line weaves around them.
+                In the same way, every word starts as a sound.
+              </p>
+            </article>
+          </div>
+
+          <aside class="temple">
+            <img class="temple__art" src="/art/vimana-ink.svg" width="410" height="830" alt="Pixel drawing of the Thanjavur Big Temple tower" loading="lazy" />
+            <div class="temple__copy">
+              <p class="temple__year"><span lang="ta">தஞ்சை</span> · <span class="temple__num">1010</span><small>Thanjavur, 1010 CE</small></p>
+              <h3><span lang="ta">கல்லில் எழுதிய மொழி.</span><small>A language written in stone.</small></h3>
+              <p>
+                Rajaraja Chola's Big Temple at Thanjavur, finished in 1010 CE, carries long Tamil inscriptions on its walls,
+                recording gifts, dancers, lamps and land. A thousand years later, Mozhi writes Tamil in pixels.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ── 6 · Models ───────────────────────────────────────── -->
+      <section class="models arakku grain" id="models" aria-labelledby="models-title">
+        <div class="wrap">
+          <header class="sec-head sec-head--light">
+            <p class="kicker kicker--light">௪ · Speech models</p>
+            <h2 id="models-title"><span lang="ta">வேகமா? துல்லியமா? நீங்களே முடிவு பண்ணுங்க.</span><small>Fast or precise? You choose.</small></h2>
+            <p class="sec-head__lede">Download a model once from inside the app and switch any time. Sizes are approximate.</p>
+          </header>
+          <ul class="stamps" role="list">
+            <li class="stamp stamp--pick">
+              <span class="stamp__seal" lang="ta">பரிந்துரை<small>Recommended</small></span>
+              <p class="stamp__year">WHISPER · 2024</p>
+              <h3>Large v3 Turbo <span>Q5</span></h3>
+              <p class="stamp__size">≈ 550 MB</p>
+              <dl class="meter"><div><dt>Speed</dt><dd data-score="4"></dd></div><div><dt lang="ta">தமிழ்</dt><dd data-score="4"></dd></div></dl>
+              <p class="stamp__note">Close to large-model accuracy at turbo speed. The best default.</p>
+            </li>
+            <li class="stamp">
+              <p class="stamp__year">WHISPER · 2023</p>
+              <h3>Large v3 <span>Q5</span></h3>
+              <p class="stamp__size">≈ 1.1 GB</p>
+              <dl class="meter"><div><dt>Speed</dt><dd data-score="2"></dd></div><div><dt lang="ta">தமிழ்</dt><dd data-score="5"></dd></div></dl>
+              <p class="stamp__note">The most accurate Tamil in the catalogue, and the slowest.</p>
+            </li>
+            <li class="stamp">
+              <p class="stamp__year">WHISPER · 2024</p>
+              <h3>Large v3 Turbo</h3>
+              <p class="stamp__size">≈ 1.6 GB</p>
+              <dl class="meter"><div><dt>Speed</dt><dd data-score="3"></dd></div><div><dt lang="ta">தமிழ்</dt><dd data-score="4"></dd></div></dl>
+              <p class="stamp__note">Full-precision turbo, for machines with memory to spare.</p>
+            </li>
+            <li class="stamp">
+              <p class="stamp__year">WHISPER · 2022</p>
+              <h3>Medium <span>Q5</span></h3>
+              <p class="stamp__size">≈ 540 MB</p>
+              <dl class="meter"><div><dt>Speed</dt><dd data-score="3"></dd></div><div><dt lang="ta">தமிழ்</dt><dd data-score="3"></dd></div></dl>
+              <p class="stamp__note">A solid middle ground on older Intel Macs and PCs.</p>
+            </li>
+            <li class="stamp">
+              <p class="stamp__year">WHISPER · 2022</p>
+              <h3>Small <span>Q5</span></h3>
+              <p class="stamp__size">≈ 190 MB</p>
+              <dl class="meter"><div><dt>Speed</dt><dd data-score="4"></dd></div><div><dt lang="ta">தமிழ்</dt><dd data-score="2"></dd></div></dl>
+              <p class="stamp__note">Light and quick. Best for clear, simple sentences.</p>
+            </li>
+            <li class="stamp stamp--byo">
+              <p class="stamp__year">YOURS · ANY YEAR</p>
+              <h3><span lang="ta">உங்கள் மாடல்</span><small>Your model</small></h3>
+              <p class="stamp__size">Bring your own</p>
+              <p class="stamp__note">Drop a Tamil fine-tuned Whisper model (converted to ggml) into the models folder and Mozhi lists it.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ── 7 · Open source ──────────────────────────────────── -->
+      <section class="oss manjal" id="open-source" aria-labelledby="oss-title">
+        <div class="wrap oss__grid">
+          <div>
+            <p class="kicker">௫ · Open source</p>
+            <h2 id="oss-title"><span lang="ta">திறந்த மூலம். திறந்த வாசல்.</span><small>Open source. Open door.</small></h2>
+            <p>
+              Mozhi is Apache-2.0 and built in the open with Tauri, Rust and whisper.cpp. Tamil belongs to everyone who speaks
+              it, and so does this tool. Fork it, fix it, teach it your district's way of talking.
+            </p>
+            <ul class="wants">
+              <li><span lang="ta">எழுத்துப்பெயர்ப்பு</span> <i>transliteration</i>: sharper Tanglish spelling rules</li>
+              <li><span lang="ta">வட்டார வழக்கு</span> <i>regional dialects</i>: testing with Madurai, Kongu, Jaffna and Malaysian Tamil</li>
+              <li><span lang="ta">புதிய மாடல்</span> <i>new models</i>: Tamil fine-tunes, converted and benchmarked</li>
+              <li><span lang="ta">லினக்ஸ்</span> <i>Linux</i>: a Linux port</li>
+            </ul>
+            <div class="oss__cta">
+              <a class="btn btn--ink" href="%SITE.repo%" rel="noopener">★ Star on GitHub</a>
+              <a class="btn btn--line" href="%SITE.contributing%" rel="noopener">Read CONTRIBUTING.md</a>
+            </div>
+          </div>
+          <div class="term" role="group" aria-label="Build from source">
+            <div class="term__bar"><span class="win__lights"><i></i><i></i><i></i></span><span>build from source</span></div>
+            <pre><code><span class="c"># needs Node 22+, Rust and CMake</span>
+git clone %SITE.repo%
+cd mozhi &amp;&amp; npm install
+npm run desktop:dev
+
+<span class="c"># press ⌃⌃ and say வணக்கம்</span></code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 8 · FAQ ──────────────────────────────────────────── -->
+      <section class="faq paper" id="faq" aria-labelledby="faq-title">
+        <div class="wrap faq__wrap">
+          <header class="sec-head">
+            <p class="kicker">௬ · Questions</p>
+            <h2 id="faq-title"><span lang="ta">கேள்விகள்</span><small>Questions, answered.</small></h2>
+          </header>
+          <div class="qa">
+            <details>
+              <summary><span lang="ta">இது இலவசமா?</span> Is it free?</summary>
+              <p>Yes. Mozhi is free and open source under Apache-2.0. There's no account, subscription or paid tier.</p>
+            </details>
+            <details>
+              <summary><span lang="ta">இணையம் வேண்டுமா?</span> Does it need the internet?</summary>
+              <p>Only once, to download a speech model (about 550 MB for the recommended one). After that it works fully offline.</p>
+            </details>
+            <details>
+              <summary><span lang="ta">எந்த app-ல வேலை செய்யும்?</span> Which apps does it work in?</summary>
+              <p>Anything you can type into: Slack, WhatsApp Desktop, Gmail in your browser, Notes, Word, VS Code and more. It pastes just as you would.</p>
+            </details>
+            <details>
+              <summary><span lang="ta">ஏன் Accessibility அனுமதி?</span> Why does macOS ask for Accessibility access?</summary>
+              <p>
+                Mozhi needs it to notice the double-tap, see which app and field you're in, and paste. It never records your
+                typing: the listener only watches for the trigger key, plus Enter and Esc while the pill is open.
+              </p>
+            </details>
+            <details>
+              <summary><span lang="ta">தமிழ் எவ்வளவு சரியா வரும்?</span> How accurate is the Tamil?</summary>
+              <p>
+                Large Whisper models handle clear Tamil speech well. Heavy background noise, strong accents and rare names
+                can still trip them up. For better accuracy, pick a larger model or try a Tamil fine-tune.
+              </p>
+            </details>
+            <details>
+              <summary><span lang="ta">இலங்கை, மலேசியத் தமிழ்?</span> Sri Lankan or Malaysian Tamil?</summary>
+              <p>It works, but accuracy varies by accent. Tell us how it does for you; dialect test reports help a lot.</p>
+            </details>
+            <details>
+              <summary><span lang="ta">Windows, Linux?</span> Which platforms?</summary>
+              <p>macOS 12+ (Apple Silicon and Intel) and Windows 10/11 today. A Linux port would make a great first contribution.</p>
+            </details>
+            <details>
+              <summary><span lang="ta">Polish என்ன செய்யும்?</span> What does the optional polish do?</summary>
+              <p>
+                It fixes punctuation and spacing and keeps English words in English. It never translates or adds anything.
+                It runs on a local model through Ollama, and if that model is slow or unsure, you get the plain transcript.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot ink" role="contentinfo">
+      <div class="band band--kaavi" aria-hidden="true"></div>
+      <div class="wrap">
+        <figure class="kural">
+          <blockquote lang="ta">அகர முதல எழுத்தெல்லாம் ஆதி<br />பகவன் முதற்றே உலகு</blockquote>
+          <figcaption>
+            Just as every letter begins with <span lang="ta">அ</span>, the world begins with the Primal One. <cite>Thirukkural, couplet 1</cite>
+          </figcaption>
+        </figure>
+        <div class="foot__row">
+          <a class="brand brand--light" href="#top" aria-label="Back to top">
+            <img src="/art/mark.svg" width="30" height="30" alt="" />
+            <span class="brand__ta" lang="ta">மொழி</span>
+            <span class="brand__en">Mozhi</span>
+          </a>
+          <nav class="foot__links" aria-label="Project">
+            <a href="%SITE.repo%" rel="noopener">GitHub</a>
+            <a href="%SITE.releases%" rel="noopener">Releases</a>
+            <a href="%SITE.contributing%" rel="noopener">Contributing</a>
+            <a href="%SITE.license%" rel="noopener">Licence</a>
+            <a href="%SITE.issues%" rel="noopener">Report an issue</a>
+          </nav>
+        </div>
+        <p class="foot__small">
+          Apache-2.0 · Speech recognition by whisper.cpp (MIT) running OpenAI Whisper models (MIT) · Made for Tamil speakers everywhere ·
+          <span lang="ta">தமிழ் வாழ்க</span> (long live Tamil)
+        </p>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
