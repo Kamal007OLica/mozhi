@@ -2078,9 +2078,10 @@ h3 small {
   display: flex;
   justify-content: center;
   align-items: baseline;
-  gap: 10px;
-  font: 600 0.66rem/1 var(--mz-font-mono);
-  letter-spacing: 0.16em;
+  gap: 8px;
+  font: 600 0.62rem/1 var(--mz-font-mono);
+  letter-spacing: 0.12em;
+  white-space: nowrap;
   color: var(--mz-ink);
 }
 .portrait figcaption span {
