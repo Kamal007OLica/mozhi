@@ -303,7 +303,7 @@ function activeSection() {
 // ── Scroll reveal: content is visible without JS; this only adds the entrance ──
 function reveal() {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const groups = [".sec-head", ".steps", ".callout", ".said", ".mode-cards", ".privacy__copy", ".receipt", ".poster", ".tales", ".temple", ".stamps", ".oss__grid", ".portrait", ".maker__copy", ".qa", ".kural"];
+  const groups = [".sec-head", ".steps", ".callout", ".repo-links", ".said", ".mode-cards", ".privacy__copy", ".receipt", ".poster", ".tales", ".temple", ".stamps", ".oss__grid", ".portrait", ".maker__copy", ".qa", ".kural"];
   const targets: HTMLElement[] = [];
   for (const sel of groups) {
     document.querySelectorAll<HTMLElement>(sel).forEach((el) => {

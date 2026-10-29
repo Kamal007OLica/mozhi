@@ -2231,3 +2231,114 @@ blockquote {
   align-self: end;
   margin-top: 0;
 }
+
+/* ── Repo links (in #how) ────────────────────────────────── */
+
+.repo-links {
+  margin-top: clamp(40px, 6vw, 64px);
+}
+.repo-links__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 20px;
+  margin: 0 0 18px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--mz-ink);
+}
+.repo-links__head > span {
+  font: 600 0.75rem/1.3 var(--mz-font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mz-kumkum-700);
+}
+.repo-links__head > span span {
+  margin-right: 8px;
+  font: 800 1.05rem/1.3 var(--mz-font-display);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--mz-ink);
+}
+.repo-links__head a {
+  font: 600 0.85rem/1.3 var(--mz-font-mono);
+  color: var(--mz-ink);
+}
+.repo-links ul {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.repo-links li a {
+  display: grid;
+  gap: 2px;
+  height: 100%;
+  padding: 18px 18px 16px;
+  color: var(--mz-ink);
+  text-decoration: none;
+  background: var(--mz-surface);
+  border: 2px solid var(--mz-ink);
+  border-radius: var(--mz-r-md);
+  box-shadow: var(--mz-print);
+  transition:
+    transform var(--mz-dur-fast) var(--mz-ease-out),
+    box-shadow var(--mz-dur-fast) var(--mz-ease-out),
+    background var(--mz-dur-fast) var(--mz-ease-out);
+}
+.repo-links li a:hover {
+  background: var(--mz-manjal-100);
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--mz-mai);
+}
+.repo-links li a:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--mz-mai);
+}
+.repo-links svg {
+  margin-bottom: 8px;
+  color: var(--mz-kumkum);
+}
+.repo-links li span[lang="ta"] {
+  font: 800 1.25rem/1.3 var(--mz-font-display);
+}
+.repo-links li b {
+  font-size: 0.95rem;
+}
+.repo-links li small {
+  margin-top: 4px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--mz-ink-muted);
+}
+@media (max-width: 960px) {
+  .repo-links ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 420px) {
+  .repo-links ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Honest download note under the hero buttons */
+.hero__note {
+  margin: -4px 0 14px;
+  font-size: 0.92rem;
+  color: var(--mz-olai);
+}
+.hero__note span[lang="ta"] {
+  font-weight: 700;
+  color: var(--mz-paper);
+}
+.hero__note a {
+  font-weight: 700;
+  color: var(--mz-manjal);
+}
+.foot__links span[lang="ta"] {
+  margin-right: 4px;
+  font-weight: 700;
+}
