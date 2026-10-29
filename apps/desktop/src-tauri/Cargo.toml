@@ -1,0 +1,85 @@
+[package]
+name = "mozhi"
+version = "0.1.0"
+description = "Mozhi · மொழி — open-source, on-device Tamil voice typing"
+authors = ["Mozhi contributors"]
+license = "Apache-2.0"
+edition = "2021"
+rust-version = "1.80"
+
+[lib]
+name = "mozhi_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+# ── core (controller, settings, history, commands) ──────────────────────────
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png", "macos-private-api"] }
+tauri-plugin-single-instance = "2"
+tauri-plugin-autostart = "2"
+tauri-plugin-log = "2"
+log = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+parking_lot = "0.12"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time", "sync", "fs", "io-util"] }
+
+# ── engine (src/engine): audio capture, whisper.cpp, models, transliteration, polish ──
+whisper-rs = { version = "0.16", features = ["log_backend"] }
+cpal = "0.16"
+rtrb = "0.3"
+reqwest = { version = "0.12", default-features = false, features = ["stream", "rustls-tls", "json"] }
+futures-util = "0.3"
+sha2 = "0.10"
+
+# ── platform (src/platform): hotkeys, focus tracking, paste, permissions, overlay ──
+arboard = "3"
+base64 = "0.22"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+# engine: Metal-accelerated whisper on Apple Silicon
+whisper-rs = { version = "0.16", features = ["metal"] }
+# platform
+objc2 = { version = "0.6", features = ["relax-void-encoding"] }
+objc2-foundation = "0.3"
+block2 = "0.6"
+core-foundation = "0.10"
+
+[target.'cfg(windows)'.dependencies]
+# platform
+windows = { version = "0.62", features = [
+  "Win32_Foundation",
+  "Win32_UI_WindowsAndMessaging",
+  "Win32_UI_Input_KeyboardAndMouse",
+  "Win32_System_Threading",
+  "Win32_System_LibraryLoader",
+  "Win32_System_ProcessStatus",
+  "Win32_Graphics_Gdi",
+  "Win32_UI_Accessibility",
+  "Win32_System_Com",
+  "Win32_UI_Shell",
+  "Win32_UI_HiDpi",
+  "Win32_Storage_FileSystem",
+  "Win32_System_DataExchange",
+  "Win32_System_Registry",
+  "Win32_System_Ole",
+  "Win32_System_Variant",
+] }
+png = "0.18"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true
+
+[profile.dev.package."*"]
+opt-level = 2
+
+# engine: examples/transcribe.rs reads WAV files
+[dev-dependencies]
+hound = "3.5"

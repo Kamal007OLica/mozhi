@@ -1,0 +1,70 @@
+@import "../../../../brand/fonts/fonts.css";
+@import "../../../../brand/tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  font-family: var(--mz-font-ui);
+  color: var(--mz-ink);
+  background: var(--mz-bg);
+  font-size: 15px;
+  line-height: 1.5;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+[lang="ta"],
+.ta {
+  font-family: var(--mz-font-display);
+  line-height: 1.6;
+}
+
+:focus-visible {
+  outline: 2px solid var(--mz-focus);
+  outline-offset: 2px;
+}
+
+.mono {
+  font-family: var(--mz-font-mono);
+  font-size: 0.86em;
+  letter-spacing: 0.01em;
+}
+
+kbd {
+  font-family: var(--mz-font-mono);
+  font-size: 0.78em;
+  padding: 1px 6px;
+  border-radius: 5px;
+  border: 1px solid currentColor;
+  border-bottom-width: 2px;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

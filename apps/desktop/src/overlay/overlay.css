@@ -1,0 +1,259 @@
+/* The overlay window is transparent; only the card is painted. The card sits at the
+   bottom of the window and the window grows upward with it (see overlay_resize). */
+html,
+body.overlay-body {
+  background: transparent;
+  height: 100%;
+  overflow: hidden;
+}
+
+#overlay {
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 18px 18px;
+}
+
+.card {
+  --ink: var(--mz-paper);
+  --muted: rgba(247, 240, 227, 0.56);
+  position: relative;
+  width: 100%;
+  border-radius: var(--mz-r-xl);
+  background: var(--mz-mai);
+  color: var(--ink);
+  box-shadow: var(--mz-float), inset 0 0 0 1px rgba(244, 196, 48, 0.16);
+  overflow: hidden;
+  animation: rise 320ms var(--mz-ease-spring) both;
+}
+
+/* canvas grain + a hairline of kumkum on top, like the selvedge of a Manjapai */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--mz-grain);
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+.card::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: var(--mz-kaavi);
+  background-size: 28px 3px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+
+/* ── header: the target app is always visible ── */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px 6px 16px;
+  cursor: grab;
+}
+
+.target {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.target-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  flex: none;
+}
+.target-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.eyebrow {
+  font-family: var(--mz-font-display);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--mz-manjal);
+  opacity: 0.85;
+}
+.target-line {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.target-app {
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.target-field {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.target-field:not(:empty)::before {
+  content: "›";
+  margin-right: 6px;
+  opacity: 0.6;
+}
+.target.warn .target-app {
+  color: var(--mz-manjal-300);
+  font-weight: 500;
+  white-space: normal;
+}
+
+.mode {
+  flex: none;
+  border: 1px solid rgba(244, 196, 48, 0.55);
+  background: transparent;
+  color: var(--mz-manjal);
+  border-radius: var(--mz-r-pill);
+  padding: 3px 12px 2px;
+  font-family: var(--mz-font-display);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--mz-dur) var(--mz-ease-out);
+}
+.mode:hover {
+  background: rgba(244, 196, 48, 0.12);
+}
+
+/* ── transcript ── */
+.transcript {
+  position: relative;
+  margin: 4px 16px 0;
+  padding: 6px 0 10px;
+  max-height: 168px;
+  overflow-y: auto;
+  font-family: var(--mz-font-display);
+  font-size: 19px;
+  line-height: 1.55;
+  font-weight: 450;
+  user-select: text;
+  -webkit-user-select: text;
+  scrollbar-width: none;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 14px);
+}
+.transcript::-webkit-scrollbar {
+  display: none;
+}
+.transcript.empty {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 16px;
+}
+
+/* ── footer ── */
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 10px 10px;
+  border-top: 1px dashed rgba(247, 240, 227, 0.12);
+}
+.voice {
+  flex: none;
+  display: grid;
+  place-items: center;
+  height: 40px;
+  min-width: 92px;
+  padding: 0 6px;
+  border-radius: var(--mz-r-pill);
+  background: rgba(195, 22, 28, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(23, 17, 14, 0.4);
+}
+.state {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 14px;
+}
+.status {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--mz-font-display);
+}
+.timer {
+  color: var(--muted);
+}
+.card[data-phase="done"] .status {
+  color: var(--mz-manjal);
+}
+.card[data-phase="error"] .status {
+  color: var(--mz-kumkum-300);
+  white-space: normal;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hints {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.hints kbd {
+  border-color: rgba(247, 240, 227, 0.35);
+}
+.icon-btn,
+.insert {
+  border: 0;
+  cursor: pointer;
+  border-radius: var(--mz-r-pill);
+  height: 32px;
+  transition: transform var(--mz-dur-fast) var(--mz-ease-out), opacity var(--mz-dur);
+}
+.icon-btn {
+  width: 32px;
+  background: rgba(247, 240, 227, 0.08);
+  color: var(--ink);
+  font-size: 13px;
+}
+.insert {
+  padding: 0 16px;
+  background: var(--mz-manjal);
+  color: var(--mz-mai);
+  font-weight: 700;
+  font-family: var(--mz-font-display);
+  box-shadow: 2px 2px 0 var(--mz-kumkum);
+}
+.icon-btn:active,
+.insert:active {
+  transform: translateY(1px);
+}
+button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Hints crowd out the status on a busy footer — keep the key hints, drop them only when narrow. */
+@media (max-width: 480px) {
+  .hints {
+    display: none;
+  }
+}

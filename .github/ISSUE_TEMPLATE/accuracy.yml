@@ -1,0 +1,37 @@
+name: Transcription accuracy / துல்லியம்
+description: Mozhi misheard Tamil, Tanglish or English.
+labels: ["accuracy"]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you — reports like this are how Mozhi gets better at Tamil. Please don't attach recordings of other people without their consent.
+  - type: textarea
+    id: said
+    attributes:
+      label: What you said
+      description: Exactly what you said, in Tamil script or Tanglish.
+    validations:
+      required: true
+  - type: textarea
+    id: got
+    attributes:
+      label: What Mozhi wrote
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Writing mode
+      options: [Auto, தமிழ், Tanglish, English]
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Speech model
+      placeholder: Whisper Large v3 Turbo · Q5
+  - type: input
+    id: dialect
+    attributes:
+      label: Dialect or region (optional)
+      placeholder: Chennai, Kongu, Madurai, Jaffna, Malaysia…

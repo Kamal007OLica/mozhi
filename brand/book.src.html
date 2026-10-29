@@ -1,0 +1,507 @@
+<title>Mozhi Brand Book</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Tamil:wdth,wght@75..125,100..800&family=Anek+Latin:wdth,wght@75..125,100..800&family=Tiro+Tamil:ital@0;1&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a printed brand manual — kumkum cover, then palm-leaf pages, each chapter a spread with a narrow margin column for its Tamil name. Single committed visual world (no dark theme by design). */
+{{css:tokens.css}}
+:root { color-scheme: light; }
+
+* { box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; }
+body {
+  margin: 0;
+  background: var(--mz-paper);
+  color: var(--mz-mai);
+  font-family: var(--mz-font-ui);
+  font-size: 17px;
+  line-height: 1.55;
+}
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-block: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; max-width: 62ch; }
+:focus-visible { outline: 2px solid var(--mz-mayil); outline-offset: 3px; }
+.mono { font-family: var(--mz-font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+.ta { font-family: var(--mz-font-display); }
+.grain { position: relative; isolation: isolate; }
+.grain::before { content: ""; position: absolute; inset: 0; background-image: var(--mz-grain); opacity: .5; mix-blend-mode: multiply; z-index: -1; pointer-events: none; }
+
+/* ── cover ── */
+.cover { background: var(--mz-kumkum); color: var(--mz-paper); overflow: hidden; }
+.cover .wrap { display: grid; grid-template-columns: 1.15fr 1fr; gap: 32px; align-items: end; padding-block: 56px 48px; min-height: 620px; position: relative; }
+.cover-meta { position: absolute; top: 28px; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.cover h1 { font-family: var(--mz-font-display); font-weight: 800; font-variation-settings: "wdth" 75; font-size: clamp(120px, 22vw, 290px); line-height: .82; letter-spacing: -.02em; }
+.cover h1 em { font-style: normal; color: var(--mz-manjal); }
+.cover .lede { font-size: 22px; line-height: 1.4; margin-top: 18px; }
+.cover .lede .ta { font-weight: 700; font-size: 30px; display: block; }
+.cover-art { position: relative; align-self: stretch; display: grid; place-items: center; }
+.cover-art .kolam { width: min(100%, 470px); opacity: .9; }
+.cover-art .mark { position: absolute; width: 132px; box-shadow: 6px 6px 0 var(--mz-mai); border-radius: 30px; }
+.cover-art .mark svg { display: block; width: 100%; height: auto; }
+.kaavi { height: 22px; background: var(--mz-kaavi); background-size: 44px 22px; border-block: 2px solid var(--mz-mai); }
+
+/* ── chapters ── */
+.chapter { padding-block: 88px; border-bottom: 2px solid var(--mz-mai); }
+.chapter-head { display: grid; grid-template-columns: 200px 1fr; gap: 32px; margin-bottom: 44px; }
+.chapter-no { font-family: var(--mz-font-display); font-weight: 800; font-variation-settings: "wdth" 75; font-size: 52px; line-height: .95; color: var(--mz-kumkum); overflow-wrap: anywhere; }
+.chapter-no small { display: block; margin-top: 8px; font-family: var(--mz-font-mono); font-size: 11px; font-weight: 400; letter-spacing: .16em; color: var(--mz-karungal); text-transform: uppercase; }
+.chapter h2 { font-family: var(--mz-font-display); font-weight: 800; font-variation-settings: "wdth" 78; font-size: clamp(40px, 6vw, 72px); line-height: 1; }
+.chapter h2 + p { margin-top: 14px; font-size: 19px; color: var(--mz-karungal); }
+.body { margin-left: 232px; }
+
+/* idea */
+.idea { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 2px solid var(--mz-mai); background: var(--mz-surface); }
+.idea > div { padding: 26px 24px 24px; border-left: 2px dashed rgba(23,17,14,.3); display: flex; flex-direction: column; gap: 10px; }
+.idea > div:first-child { border-left: 0; }
+.idea .glyph { height: 120px; display: grid; place-items: center; background: var(--mz-kumkum); border: 2px solid var(--mz-mai); }
+.idea .glyph svg { max-height: 92px; width: auto; }
+.idea h3 { font-family: var(--mz-font-display); font-size: 24px; font-weight: 800; }
+.idea p { font-size: 15.5px; color: var(--mz-karungal); }
+.aytham { font-family: var(--mz-font-display); font-weight: 800; color: var(--mz-manjal); font-size: 88px; line-height: 1; }
+
+/* logo */
+.logos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.logo-tile { aspect-ratio: 1; max-width: 100%; display: grid; place-items: center; border: 2px solid var(--mz-mai); position: relative; }
+.logo-tile svg { width: 46%; height: auto; }
+.logo-tile .cap { position: absolute; left: 12px; bottom: 10px; font-family: var(--mz-font-mono); font-size: 11px; letter-spacing: .1em; }
+.wordmark-row { margin-top: 20px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+.wordmark-tile { border: 2px solid var(--mz-mai); padding: 34px; display: flex; align-items: center; gap: 22px; background: var(--mz-olai); }
+.wm { font-family: var(--mz-font-display); font-weight: 800; font-variation-settings: "wdth" 75; font-size: 104px; line-height: .9; }
+.wm em { font-style: normal; color: var(--mz-kumkum); }
+.wm-sub { font-family: var(--mz-font-ui); font-weight: 600; letter-spacing: .32em; font-size: 18px; margin-top: 6px; font-variation-settings: "wdth" 110; }
+.rules { border: 2px solid var(--mz-mai); padding: 24px; background: var(--mz-surface); display: flex; flex-direction: column; gap: 12px; font-size: 15.5px; }
+.rules b { font-family: var(--mz-font-display); }
+.rules .no { color: var(--mz-kumkum-700); }
+
+/* colour */
+.swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 2px solid var(--mz-mai); }
+.sw { padding: 18px 18px 16px; min-height: 230px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; border-left: 2px solid var(--mz-mai); }
+.sw:first-child { border-left: 0; }
+.sw .ta { font-size: 30px; font-weight: 800; font-variation-settings: "wdth" 80; line-height: 1.05; }
+.sw .en { font-size: 14px; }
+.sw .hex { font-family: var(--mz-font-mono); font-size: 12px; letter-spacing: .06em; }
+.sw-sub { display: grid; grid-template-columns: repeat(6, 1fr); border: 2px solid var(--mz-mai); border-top: 0; }
+.sw-sub div { padding: 12px 12px 10px; font-family: var(--mz-font-mono); font-size: 11px; border-left: 2px solid var(--mz-mai); min-height: 76px; display: flex; flex-direction: column; justify-content: flex-end; }
+.sw-sub div:first-child { border-left: 0; }
+.ratio { margin-top: 20px; display: flex; height: 34px; border: 2px solid var(--mz-mai); }
+.ratio span { display: grid; place-items: center; font-family: var(--mz-font-mono); font-size: 11px; }
+
+/* type */
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.specimen { border: 2px solid var(--mz-mai); background: var(--mz-surface); padding: 26px; display: flex; flex-direction: column; gap: 12px; }
+.specimen .label { display: flex; justify-content: space-between; gap: 12px; }
+.specimen.poster { grid-column: span 2; background: var(--mz-kumkum); color: var(--mz-paper); }
+.poster-line { font-family: var(--mz-font-display); font-weight: 800; font-variation-settings: "wdth" 75; font-size: clamp(54px, 9vw, 120px); line-height: .95; }
+.poster-line em { font-style: normal; color: var(--mz-manjal); }
+.serif-line { font-family: var(--mz-font-serif); font-size: 30px; line-height: 1.5; }
+.ui-line { font-size: 22px; }
+.mono-line { font-family: var(--mz-font-mono); font-size: 15px; line-height: 1.7; }
+.scale { display: flex; align-items: baseline; gap: 22px; flex-wrap: wrap; margin-top: 22px; }
+.scale span { font-family: var(--mz-font-display); font-weight: 700; }
+.scale small { display: block; font-family: var(--mz-font-mono); font-size: 10px; color: var(--mz-stone); font-weight: 400; }
+
+/* patterns */
+.patterns { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
+.pat { border: 2px solid var(--mz-mai); display: flex; flex-direction: column; background: var(--mz-surface); }
+.pat-art { background: var(--mz-kumkum); display: grid; place-items: center; padding: 22px; border-bottom: 2px solid var(--mz-mai); min-height: 230px; }
+.pat-art svg { width: 100%; height: auto; max-height: 260px; }
+.pat-cap { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; }
+.pat-cap h3 { font-family: var(--mz-font-display); font-size: 21px; font-weight: 800; }
+.pat-cap p { font-size: 14.5px; color: var(--mz-karungal); }
+.pat-cap .mono { color: var(--mz-kumkum); letter-spacing: .1em; }
+.span-2 { grid-column: span 2; } .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; }
+.tile-strip { height: 120px; background-color: var(--mz-kumkum); }
+
+/* motion */
+.motion { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
+.stage { background: var(--mz-mai); color: var(--mz-paper); border: 2px solid var(--mz-mai); padding: 28px; display: flex; flex-direction: column; gap: 22px; justify-content: center; min-height: 340px; }
+.pill { align-self: center; display: grid; place-items: center; height: 92px; min-width: 230px; padding: 0 20px; border-radius: 999px; background: var(--mz-kumkum); box-shadow: inset 0 0 0 2px rgba(23,17,14,.4); }
+.state-tabs { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.state-tabs button { font: inherit; font-family: var(--mz-font-mono); font-size: 12px; letter-spacing: .08em; border: 1.5px solid rgba(247,240,227,.4); background: transparent; color: var(--mz-paper); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.state-tabs button[aria-pressed="true"] { background: var(--mz-manjal); color: var(--mz-mai); border-color: var(--mz-manjal); }
+.stage-note { text-align: center; color: rgba(247,240,227,.7); font-size: 15px; min-height: 2.6em; max-width: none; }
+.specs { border: 2px solid var(--mz-mai); background: var(--mz-surface); }
+.specs table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.specs th, .specs td { text-align: left; padding: 11px 14px; border-bottom: 1.5px dashed rgba(23,17,14,.25); vertical-align: top; }
+.specs th { font-family: var(--mz-font-display); font-size: 16px; width: 34%; }
+.specs td { font-family: var(--mz-font-mono); font-size: 12.5px; line-height: 1.6; }
+.specs tr:last-child th, .specs tr:last-child td { border-bottom: 0; }
+
+/* components */
+.comps { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.comp { border: 2px solid var(--mz-mai); padding: 28px; display: flex; flex-direction: column; gap: 16px; background: var(--mz-surface); }
+.comp > .mono { color: var(--mz-kumkum); }
+.overlay-card { background: var(--mz-mai); color: var(--mz-paper); border-radius: 28px; overflow: hidden; box-shadow: 0 18px 40px -16px rgba(23,17,14,.6); position: relative; }
+.overlay-card::after { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: var(--mz-kaavi); background-size: 28px 3px; }
+.oc-head { display: flex; align-items: center; gap: 10px; padding: 16px 16px 6px; }
+.oc-icon { width: 26px; height: 26px; border-radius: 7px; background: #4a154b; display: grid; place-items: center; font-weight: 800; color: #fff; font-size: 14px; }
+.oc-eyebrow { font-family: var(--mz-font-display); font-size: 11px; color: var(--mz-manjal); }
+.oc-app { font-size: 14px; } .oc-app b { font-weight: 650; } .oc-app span { color: rgba(247,240,227,.56); }
+.oc-mode { margin-left: auto; border: 1px solid rgba(244,196,48,.55); color: var(--mz-manjal); border-radius: 999px; padding: 2px 12px; font-family: var(--mz-font-display); font-size: 13px; font-weight: 600; }
+.oc-text { padding: 4px 16px 12px; font-family: var(--mz-font-display); font-size: 19px; line-height: 1.55; }
+.oc-foot { display: flex; align-items: center; gap: 12px; padding: 8px 10px 10px; border-top: 1px dashed rgba(247,240,227,.14); }
+.oc-pill { height: 40px; min-width: 92px; border-radius: 999px; background: var(--mz-kumkum); display: grid; place-items: center; }
+.oc-status { flex: 1; font-family: var(--mz-font-display); font-size: 14px; }
+.oc-btn { background: var(--mz-manjal); color: var(--mz-mai); border-radius: 999px; padding: 6px 16px; font-weight: 700; font-family: var(--mz-font-display); box-shadow: 2px 2px 0 var(--mz-kumkum); }
+.btn-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.btn { font: inherit; font-family: var(--mz-font-display); font-weight: 600; height: 40px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--mz-mai); background: var(--mz-surface); box-shadow: 2px 2px 0 var(--mz-mai); display: inline-flex; align-items: center; cursor: pointer; }
+.btn.primary { background: var(--mz-mai); color: var(--mz-paper); box-shadow: 2px 2px 0 var(--mz-kumkum); }
+.btn.accent { background: var(--mz-manjal); }
+.keycap { display: inline-grid; place-items: center; min-width: 54px; height: 50px; border-radius: 10px; background: var(--mz-paper); border: 1.5px solid var(--mz-mai); box-shadow: 0 4px 0 var(--mz-mai); font-size: 24px; font-weight: 700; }
+.receipt { background: var(--mz-olai); border: 1.5px solid var(--mz-mai); padding: 16px 18px 12px; box-shadow: 2px 2px 0 var(--mz-mai); }
+.receipt-head, .receipt-foot { display: flex; justify-content: space-between; gap: 10px; font-family: var(--mz-font-mono); font-size: 11.5px; color: var(--mz-karungal); }
+.receipt-head { border-bottom: 1.5px dashed rgba(23,17,14,.35); padding-bottom: 6px; margin-bottom: 8px; }
+.receipt-text { font-family: var(--mz-font-display); font-size: 18px; }
+.receipt-foot { margin-top: 8px; color: var(--mz-stone); }
+.stamp { padding: 14px; --hole: radial-gradient(circle, var(--mz-surface) 4.6px, transparent 5.2px);
+  background: var(--hole) 0 -7px / 14px 14px repeat-x, var(--hole) 0 calc(100% + 7px) / 14px 14px repeat-x, var(--hole) -7px 0 / 14px 14px repeat-y, var(--hole) calc(100% + 7px) 0 / 14px 14px repeat-y, var(--mz-kumkum); }
+.stamp-inner { background: var(--mz-manjal); border: 1.5px solid var(--mz-mai); box-shadow: 3px 3px 0 var(--mz-arakku); padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.stamp-inner h3 { font-family: var(--mz-font-display); font-size: 21px; font-weight: 800; }
+.meter { display: flex; gap: 3px; } .meter i { width: 14px; height: 6px; border-radius: 2px; background: rgba(23,17,14,.18); } .meter i.on { background: var(--mz-kumkum); }
+.meta { display: flex; justify-content: space-between; font-family: var(--mz-font-mono); font-size: 12px; }
+
+/* voice */
+.voice { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.say { border: 2px solid var(--mz-mai); background: var(--mz-surface); }
+.say h3 { padding: 12px 18px; font-family: var(--mz-font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; border-bottom: 2px solid var(--mz-mai); }
+.say.yes h3 { background: var(--mz-manjal); } .say.no h3 { background: var(--mz-mai); color: var(--mz-paper); }
+.say ul { list-style: none; margin: 0; padding: 6px 18px 12px; }
+.say li { padding: 10px 0; border-bottom: 1.5px dashed rgba(23,17,14,.22); display: flex; flex-direction: column; gap: 2px; }
+.say li:last-child { border-bottom: 0; }
+.say li .ta { font-size: 19px; font-weight: 600; }
+.say li small { color: var(--mz-karungal); font-size: 14px; }
+.principles { margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.principles div { border-top: 4px solid var(--mz-kumkum); padding-top: 12px; }
+.principles b { font-family: var(--mz-font-display); font-size: 21px; display: block; }
+.principles p { font-size: 15px; color: var(--mz-karungal); }
+
+/* colophon */
+.colophon { background: var(--mz-kumkum); color: var(--mz-paper); padding-block: 72px 56px; }
+.colophon .kural { font-family: var(--mz-font-serif); font-size: clamp(26px, 3.6vw, 42px); line-height: 1.45; max-width: none; }
+.colophon .row { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-top: 40px; align-items: end; }
+.colophon p { font-size: 15px; }
+
+@media (max-width: 900px) {
+  .cover .wrap { grid-template-columns: 1fr; min-height: 0; padding-block: 88px 40px; }
+  .cover-art { order: -1; }
+  .chapter-head { grid-template-columns: 1fr; gap: 12px; }
+  .body { margin-left: 0; }
+  .idea, .logos, .swatches, .principles { grid-template-columns: 1fr; }
+  .idea > div, .sw { border-left: 0; border-top: 2px dashed rgba(23,17,14,.3); }
+  .sw { border-top: 2px solid var(--mz-mai); min-height: 140px; }
+  .sw:first-child, .idea > div:first-child { border-top: 0; }
+  .sw-sub { grid-template-columns: repeat(3, 1fr); }
+  .sw-sub div:nth-child(4) { border-left: 0; }
+  .sw-sub div:nth-child(n+4) { border-top: 2px solid var(--mz-mai); }
+  .wordmark-row, .type-grid, .motion, .comps, .voice { grid-template-columns: 1fr; }
+  .specimen.poster { grid-column: auto; }
+  .patterns { grid-template-columns: 1fr; }
+  .span-2, .span-3, .span-4 { grid-column: auto; }
+  .logo-tile { max-width: 360px; width: 100%; }
+  .chapter { padding-block: 56px; }
+  .wm { font-size: 72px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<header class="cover grain" aria-labelledby="cover-title">
+  <div class="wrap">
+    <div class="cover-meta mono"><span>Mozhi · Brand book</span><span>v1 · 2026 · Apache-2.0</span></div>
+    <div>
+      <h1 id="cover-title" lang="ta">மொ<em>ழி</em></h1>
+      <p class="lede"><span class="ta" lang="ta">பேசுங்க. எழுத்தாகும்.</span>An open-source Tamil voice keyboard that runs on your own computer. This book sets how it looks, moves and speaks.</p>
+    </div>
+    <div class="cover-art" aria-hidden="true">
+      <div class="kolam">{{svg:patterns/kolam-7.svg}}</div>
+      <div class="mark">{{svg:logo/mozhi-mark.svg}}</div>
+    </div>
+  </div>
+</header>
+<div class="kaavi" aria-hidden="true"></div>
+
+<main>
+  <section class="chapter" aria-labelledby="c1">
+    <div class="wrap">
+      <div class="chapter-head">
+        <div class="chapter-no" lang="ta">கரு<small>The idea</small></div>
+        <div><h2 id="c1">Every word starts as a dot.</h2><p>The mark is ஃ, āytham, a letter only Tamil has. Its three dots carry three meanings at once, and the product uses all three.</p></div>
+      </div>
+      <div class="body idea">
+        <div><div class="glyph"><span class="aytham" lang="ta">ஃ</span></div><h3 lang="ta">ஆய்தம்</h3><p>The letter. Three pulli in a triangle, used in words like எஃகு (steel). It is the logo, the app icon and the menu-bar icon.</p></div>
+        <div><div class="glyph">{{svg:patterns/muvendar-tiger.svg}}</div><h3 lang="ta">மூவேந்தர்</h3><p>The three crowned kingdoms: Chera, Chola and Pandya. Three dots, three kings, one language. Their emblems make up the brand's graphic set.</p></div>
+        <div><div class="glyph">{{svg:patterns/kolam-5.svg}}</div><h3 lang="ta">புள்ளிக் கோலம்</h3><p>The dot grid of a kolam, drawn at every doorstep each morning. One unbroken line around every dot is how Mozhi draws its patterns.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" aria-labelledby="c2">
+    <div class="wrap">
+      <div class="chapter-head">
+        <div class="chapter-no" lang="ta">முத்திரை<small>Logo</small></div>
+        <div><h2 id="c2">The mark and the wordmark</h2><p>Turmeric dots on kumkum is the primary lock-up. Ink and paper versions exist for surfaces where red would clash.</p></div>
+      </div>
+      <div class="body">
+        <div class="logos">
+          <div class="logo-tile" style="background:var(--mz-olai)">{{svg:logo/mozhi-mark.svg}}<span class="cap">PRIMARY · KUMKUM</span></div>
+          <div class="logo-tile" style="background:var(--mz-manjal)">{{svg:logo/mozhi-mark-ink.svg}}<span class="cap">INK · ON TURMERIC</span></div>
+          <div class="logo-tile" style="background:var(--mz-mai);color:var(--mz-paper)">{{svg:logo/mozhi-mark-paper.svg}}<span class="cap">PAPER · ON INK</span></div>
+        </div>
+        <div class="wordmark-row">
+          <div class="wordmark-tile"><div><div class="wm" lang="ta">மொ<em>ழி</em></div><div class="wm-sub">MOZHI</div></div></div>
+          <div class="rules">
+            <div><b>ழ takes the accent.</b> It is the sound only Tamil has, so it carries the colour.</div>
+            <div><b>Clear space</b> equals one dot diameter on every side of the mark.</div>
+            <div><b>Minimum size</b> 16 px for the mark, 64 px wide for the wordmark.</div>
+            <div class="no"><b>Never</b> rotate the triangle, add a fourth dot, outline the dots or set the wordmark in a non-Tamil face.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" aria-labelledby="c3">
+    <div class="wrap">
+      <div class="chapter-head">
+        <div class="chapter-no" lang="ta">வண்ணம்<small>Colour</small></div>
+        <div><h2 id="c3">Colours from a Tamil home</h2><p>Every colour is named after something you would find at home or in a temple. Red is the ground, turmeric is the voice, palm-leaf cream is where text is read.</p></div>
+      </div>
+      <div class="body">
+        <div class="swatches">
+          <div class="sw" style="background:var(--mz-kumkum);color:var(--mz-paper)"><span class="ta" lang="ta">குங்குமம்</span><span class="en">Kumkum · ground</span><span class="hex">#C3161C</span></div>
+          <div class="sw" style="background:var(--mz-manjal)"><span class="ta" lang="ta">மஞ்சள்</span><span class="en">Manjal · the voice</span><span class="hex">#F4C430</span></div>
+          <div class="sw" style="background:var(--mz-olai)"><span class="ta" lang="ta">ஓலை</span><span class="en">Olai · palm leaf</span><span class="hex">#EFE4CF</span></div>
+          <div class="sw" style="background:var(--mz-mai);color:var(--mz-paper)"><span class="ta" lang="ta">மை</span><span class="en">Mai · lamp-black ink</span><span class="hex">#17110E</span></div>
+        </div>
+        <div class="sw-sub">
+          <div style="background:var(--mz-arakku);color:var(--mz-paper)">அரக்கு<br>#6B0A0E</div>
+          <div style="background:var(--mz-kumkum-300)">KUMKUM 300<br>#E5574F</div>
+          <div style="background:var(--mz-chandanam)">சந்தனம்<br>#E3CFAE</div>
+          <div style="background:var(--mz-karungal);color:var(--mz-paper)">கருங்கல்<br>#4A3F38</div>
+          <div style="background:var(--mz-pachai);color:var(--mz-paper)">பச்சை · ok<br>#2F7D4F</div>
+          <div style="background:var(--mz-mayil);color:var(--mz-paper)">மயில் · focus<br>#0E5E5A</div>
+        </div>
+        <div class="ratio" role="img" aria-label="Usage ratio: 45 percent paper, 30 percent kumkum, 15 percent ink, 10 percent turmeric">
+          <span style="flex:45;background:var(--mz-paper)">PAPER 45</span>
+          <span style="flex:30;background:var(--mz-kumkum);color:var(--mz-paper)">KUMKUM 30</span>
+          <span style="flex:15;background:var(--mz-mai);color:var(--mz-paper)">MAI 15</span>
+          <span style="flex:10;background:var(--mz-manjal)">MANJAL 10</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" aria-labelledby="c4">
+    <div class="wrap">
+      <div class="chapter-head">
+        <div class="chapter-no" lang="ta">எழுத்து<small>Type</small></div>
+        <div><h2 id="c4">Condensed like a Manjapai print</h2><p>Anek Tamil's width axis gives us both voices from one family: squeezed to 75 for poster headlines, opened to 100 for the interface. Tiro Tamil carries quotations, and JetBrains Mono carries receipts and labels.</p></div>
+      </div>
+      <div class="body type-grid">
+        <div class="specimen poster grain">
+          <div class="label mono"><span>Anek Tamil · 800 · wdth 75</span><span>Display</span></div>
+          <div class="poster-line" lang="ta">பேச்சு <em>எழுத்தாகும்</em></div>
+        </div>
+        <div class="specimen">
+          <div class="label mono"><span>Anek Tamil + Latin · wdth 100</span><span>Interface</span></div>
+          <div class="ui-line" lang="ta">நாளைக்கு காலையில meeting இருக்கு.</div>
+          <div class="ui-line">There's a meeting tomorrow morning.</div>
+        </div>
+        <div class="specimen">
+          <div class="label mono"><span>Tiro Tamil · 400</span><span>Quotation</span></div>
+          <div class="serif-line" lang="ta">யாமறிந்த மொழிகளிலே தமிழ்மொழி போல் இனிதாவது எங்கும் காணோம்</div>
+          <div class="mono">Bharathiyar</div>
+        </div>
+        <div class="specimen" style="grid-column:1/-1">
+          <div class="label mono"><span>JetBrains Mono · 400</span><span>Receipts, labels, data</span></div>
+          <div class="mono-line">29/10/2026 11:02 · SLACK · TAMIL<br>5.2s audio · 640 ms · ✓ inserted</div>
+          <div class="scale" aria-label="Type scale">
+            <span style="font-size:12px">அ<small>12</small></span><span style="font-size:14px">அ<small>14</small></span><span style="font-size:16px">அ<small>16</small></span><span style="font-size:20px">அ<small>20</small></span><span style="font-size:24px">அ<small>24</small></span><span style="font-size:32px">அ<small>32</small></span><span style="font-size:48px">அ<small>48</small></span><span style="font-size:72px">அ<small>72</small></span><span style="font-size:112px;line-height:.9">அ<small>112</small></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" aria-labelledby="c5">
+    <div class="wrap">
+      <div class="chapter-head">
+        <div class="chapter-no" lang="ta">கோலம்<small>Patterns · c. 1000 CE</small></div>
+        <div><h2 id="c5">Drawn from the Chola century</h2><p>Every pattern is generated from code in <span class="mono" style="text-transform:none;letter-spacing:0">brand/scripts/generate.py</span>, so it stays sharp at any size and anyone can rebuild it.</p></div>
+      </div>
+      <div class="body patterns">
+        <figure class="pat span-3" style="margin:0"><div class="pat-art">{{svg:patterns/kolam-13.svg}}</div><figcaption class="pat-cap"><span class="mono">Sikku kolam</span><h3 lang="ta">சிக்குக் கோலம்</h3><p>One closed line woven around a 13 × 13 pulli grid, drawn with the mirror-curve method. Used on heroes and empty states.</p></figcaption></figure>
+        <figure class="pat span-3" style="margin:0"><div class="pat-art">{{svg:patterns/vimana.svg}}</div><figcaption class="pat-cap"><span class="mono">Thanjavur · 1010 CE</span><h3 lang="ta">விமானம்</h3><p>Rajaraja Chola's Periya Kovil tower on a pixel grid: thirteen tiers, the dome and the kalasam. It anchors the sidebar.</p></figcaption></figure>
+        <figure class="pat span-2" style="margin:0"><div class="pat-art">{{svg:patterns/muvendar-bow.svg}}</div><figcaption class="pat-cap"><span class="mono">Chera</span><h3 lang="ta">வில்</h3><p>The bow of the western kingdom.</p></figcaption></figure>
+        <figure class="pat span-2" style="margin:0"><div class="pat-art">{{svg:patterns/muvendar-tiger.svg}}</div><figcaption class="pat-cap"><span class="mono">Chola</span><h3 lang="ta">புலி</h3><p>The tiger of the Chola flag, set as pixels.</p></figcaption></figure>
+        <figure class="pat span-2" style="margin:0"><div class="pat-art">{{svg:patterns/muvendar-fish.svg}}</div><figcaption class="pat-cap"><span class="mono">Pandya</span><h3 lang="ta">கயல்</h3><p>The twin fish of Madurai.</p></figcaption></figure>
+        <figure class="pat span-2" style="margin:0"><div class="pat-art">{{svg:patterns/prabha.svg}}</div><figcaption class="pat-cap"><span class="mono">Nataraja</span><h3 lang="ta">பிரபை</h3><p>The ring of fire around the Chola bronze. It turns while Mozhi writes.</p></figcaption></figure>
+        <figure class="pat span-4" style="margin:0"><div class="pat-art" style="padding:0;align-items:stretch"><div style="display:grid;grid-template-rows:1fr auto 1fr;width:100%"><div class="tile-strip" style="background-image:url('data:image/svg+xml;utf8,{{uri:patterns/tile-alai.svg}}');background-size:80px 40px"></div><div class="kaavi" style="border-inline:0"></div><div class="tile-strip" style="background-image:url('data:image/svg+xml;utf8,{{uri:patterns/band-kodi.svg}}');background-size:96px 40px;background-repeat:repeat-x;background-position:center"></div></div></div><figcaption class="pat-cap"><span class="mono">Alai · kaavi · kodi</span><h3 lang="ta">அலை · காவி · கொடி</h3><p>Tiles and bands: the waves the Chola fleet crossed in 1025 CE, the red-and-white temple-wall stripe, and a lotus cornice band.</p></figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" aria-labelledby="c6">
+    <div class="wrap">
+      <div class="chapter-head">
+        <div class="chapter-no" lang="ta">அசைவு<small>Motion</small></div>
+        <div><h2 id="c6">Three dots that listen</h2><p>The dots are the only thing that moves. They follow your voice while you speak, gather into ஃ while Mozhi writes, and settle when the text lands.</p></div>
+      </div>
+      <div class="body motion">
+        <div class="stage">
+          <div class="pill"><svg id="dots" aria-hidden="true"></svg></div>
+          <div class="state-tabs" role="group" aria-label="Dot states">
+            <button type="button" id="st-idle" data-s="idle">Idle</button>
+            <button type="button" id="st-listening" data-s="listening" aria-pressed="true">Listening</button>
+            <button type="button" id="st-transcribing" data-s="transcribing">Writing</button>
+            <button type="button" id="st-done" data-s="done">Done</button>
+            <button type="button" id="st-error" data-s="error">Error</button>
+          </div>
+          <p class="stage-note" id="note" aria-live="polite"></p>
+        </div>
+        <div class="specs">
+          <table>
+            <tr><th>Idle</th><td>Row, gap 1.6 × diameter. Breathes 1 → 1.08 every 2.4 s.</td></tr>
+            <tr><th>Listening</th><td>y = −A · sin(2π · 1.6 Hz · t − 0.9 · i). A runs from 2 px up to 1.1 × diameter with voice level, with a fast attack and a slow release.</td></tr>
+            <tr><th>Writing</th><td>Glide into ஃ, 420 ms, cubic-bezier(.34,1.56,.64,1). One turn every 1.2 s inside the prabha at 30% opacity.</td></tr>
+            <tr><th>Done</th><td>Upright ஃ, one 360 ms pulse to 1.28×. "✓ Inserted into App" appears.</td></tr>
+            <tr><th>Error</th><td>Three shakes of 6 px over 420 ms, tinted kumkum 300.</td></tr>
+            <tr><th>Reduced motion</th><td>Static positions only. State is carried by colour and label.</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" aria-labelledby="c7">
+    <div class="wrap">
+      <div class="chapter-head">
+        <div class="chapter-no" lang="ta">கூறுகள்<small>Components</small></div>
+        <div><h2 id="c7">Built from the same press</h2><p>Hard offset shadows instead of soft blur, like a block print slightly out of register. Stamps hold choices, receipts hold history, and the overlay is ink on ink.</p></div>
+      </div>
+      <div class="body comps">
+        <div class="comp" style="grid-column:1/-1">
+          <span class="mono">Dictation overlay</span>
+          <div class="overlay-card">
+            <div class="oc-head"><span class="oc-icon">S</span><div><div class="oc-eyebrow" lang="ta">இதில் எழுதும்</div><div class="oc-app"><b>Slack</b> <span>› Message #general</span></div></div><span class="oc-mode" lang="ta">தமிழ்</span></div>
+            <div class="oc-text" lang="ta">வணக்கம் எல்லாருக்கும், இன்னைக்கு meeting-க்கு கொஞ்சம் late ஆகும்.</div>
+            <div class="oc-foot"><span class="oc-pill"><svg id="dots2" aria-hidden="true"></svg></span><span class="oc-status" lang="ta">கேட்கிறேன்… <span class="mono" style="letter-spacing:0;color:rgba(247,240,227,.5)">0:07</span></span><span class="oc-btn" lang="ta">இடு</span></div>
+          </div>
+          <p style="font-size:15px;color:var(--mz-karungal)">The target app is always named at the top, so text never lands in the wrong place. The overlay never takes focus.</p>
+        </div>
+        <div class="comp">
+          <span class="mono">Keys and buttons</span>
+          <div class="btn-row"><span class="keycap">⌃</span><span class="keycap">⌃</span><span style="font-family:var(--mz-font-display);font-size:18px" lang="ta">இருமுறை தட்டுங்கள்</span></div>
+          <div class="btn-row"><button type="button" class="btn primary" lang="ta">அடுத்து</button><button type="button" class="btn accent" lang="ta">பதிவிறக்கு · 574 MB</button><button type="button" class="btn" lang="ta">நகலெடு</button></div>
+        </div>
+        <div class="comp">
+          <span class="mono">Model stamp</span>
+          <div class="stamp"><div class="stamp-inner"><h3>Whisper Large v3 Turbo · Q5</h3><div class="meta"><span lang="ta">வேகம்</span><span class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div><div class="meta"><span lang="ta">தமிழ் துல்லியம்</span><span class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div></div></div>
+        </div>
+        <div class="comp" style="grid-column:1/-1">
+          <span class="mono">History receipt</span>
+          <div class="receipt"><div class="receipt-head"><span>29/10/2026 · 11:02</span><span>WhatsApp · Tanglish</span></div><div class="receipt-text">naalaikku kaalaiyila call pannalaam, ok va?</div><div class="receipt-foot"><span>3.1s audio · 420 ms · ✓ inserted</span><span>No. 001256</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" aria-labelledby="c8">
+    <div class="wrap">
+      <div class="chapter-head">
+        <div class="chapter-no" lang="ta">குரல்<small>Voice</small></div>
+        <div><h2 id="c8">Talk like a friend from home</h2><p>Tamil leads and English supports. Use spoken Tamil, the way people actually type, with English words left in English when that is how people say them.</p></div>
+      </div>
+      <div class="body">
+        <div class="voice">
+          <div class="say yes"><h3>Say</h3><ul>
+            <li><span class="ta" lang="ta">பேசுங்கள் — தமிழ், Tanglish, English…</span><small>Plain invitation. The three modes are named the way users name them.</small></li>
+            <li><span class="ta" lang="ta">Slack-இல் ஒட்டப்பட்டது</span><small>Says what happened and where.</small></li>
+            <li><span class="ta" lang="ta">மைக்ரோஃபோன் தடுக்கப்பட்டுள்ளது — Settings-இல் அனுமதி கொடுங்கள்</span><small>The problem, then the fix.</small></li>
+          </ul></div>
+          <div class="say no"><h3>Avoid</h3><ul>
+            <li><span class="ta" lang="ta">ஒலிவாங்கி உள்ளீட்டுச் சாதனம்</span><small>Formal coinages nobody says aloud. Use "மைக்ரோஃபோன்".</small></li>
+            <li><span class="ta" lang="ta">ஏதோ தவறு நடந்தது!</span><small>Vague and alarming. Name the cause.</small></li>
+            <li><span class="ta">AI-powered magic ✨</span><small>Hype. Mozhi is a tool, and it is honest about what runs where.</small></li>
+          </ul></div>
+        </div>
+        <div class="principles">
+          <div><b lang="ta">உங்கள் கணினியில்</b><p>Private by default. No account, no cloud, no telemetry. Say so wherever it matters.</p></div>
+          <div><b lang="ta">எங்கே, எதில்</b><p>Always show which app the text is going into. Never surprise anyone with a paste.</p></div>
+          <div><b lang="ta">திறந்த மூலம்</b><p>Open source under Apache-2.0. Every pattern, model and string can be rebuilt by anyone.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="colophon grain">
+  <div class="wrap">
+    <p class="kural" lang="ta">அகர முதல எழுத்தெல்லாம் ஆதி<br>பகவன் முதற்றே உலகு</p>
+    <div class="row">
+      <p class="mono">Thirukkural · 1 — as all letters begin with அ, the world begins with the source.</p>
+      <p class="mono">Mozhi · மொழி · 2026</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const NOTES = {
+    idle: "Waiting. Double-tap Control to start.",
+    listening: "Following the voice. The amplitude is simulated here.",
+    transcribing: "Gathered into ஃ, turning inside the prabha.",
+    done: "Settled upright with one pulse. ✓ Inserted into Slack",
+    error: "A short shake in kumkum. The message says what to fix.",
+  };
+  function prabha(cx, cy, r0, r1, n) {
+    let d = "";
+    const p = (r, a) => `${(cx + r * Math.cos(a)).toFixed(1)} ${(cy + r * Math.sin(a)).toFixed(1)}`;
+    for (let k = 0; k < n; k++) {
+      const a = (2 * Math.PI * k) / n, a1 = a - (Math.PI / n) * 0.8, a2 = a + (Math.PI / n) * 0.8, rm = r0 + (r1 - r0) * 0.55;
+      d += `M${p(r0, a1)} Q${p(rm, a - 0.08)} ${p(r1, a + 0.12)} Q${p((r0 + rm) / 2, (a2 + a - 0.08) / 2)} ${p(r0, a2)}Z`;
+    }
+    return `<circle cx="${cx}" cy="${cy}" r="${r0}" fill="none" stroke="#f4c430" stroke-width="1"/><path fill="#f4c430" d="${d}"/>`;
+  }
+  function makeDots(svg, d, auto) {
+    const w = Math.round(d * 7.2 + d * 2), h = Math.round(d * 4.2);
+    svg.setAttribute("viewBox", `0 0 ${w} ${h}`); svg.setAttribute("width", w); svg.setAttribute("height", h); svg.style.overflow = "visible";
+    const ring = document.createElementNS(NS, "g"); ring.innerHTML = prabha(w / 2, h / 2, d * 1.55, d * 1.95, 15); ring.style.opacity = 0; ring.style.transition = "opacity .3s"; svg.appendChild(ring);
+    const cs = [0, 1, 2].map(() => { const c = document.createElementNS(NS, "circle"); c.setAttribute("r", d / 2); c.setAttribute("fill", "#f4c430"); svg.appendChild(c); return c; });
+    const s = { state: "listening", since: performance.now(), lvl: 0, sm: 0, pos: [0, 1, 2].map(i => ({ x: w / 2 + (i - 1) * d * 2.6, y: h / 2 })) };
+    const row = (t) => [-1, 0, 1].map((k, i) => ({ x: w / 2 + k * d * 2.6, y: s.state === "listening" ? h / 2 - (2 + s.sm * d * 1.1) * Math.sin(t * 2 * Math.PI * 1.6 - i * 0.9) : h / 2 }));
+    const tri = (ang) => [-90, 150, 30].map(deg => { const a = deg * Math.PI / 180 + ang; return { x: w / 2 + d * 1.15 * Math.cos(a), y: h / 2 + d * 0.1 + d * 1.15 * Math.sin(a) }; });
+    function frame(now) {
+      requestAnimationFrame(frame);
+      const t = now / 1000, age = (now - s.since) / 1000;
+      if (auto || s.state === "listening") s.lvl = s.state === "listening" ? 0.3 + 0.45 * Math.abs(Math.sin(t * 3.1) * Math.sin(t * 1.3)) : 0;
+      s.sm += (s.lvl - s.sm) * (s.lvl > s.sm ? 0.45 : 0.08);
+      let tg, sc = [1, 1, 1];
+      if (s.state === "transcribing") { tg = tri(still ? 0 : age * 2 * Math.PI / 1.2); if (!still) ring.setAttribute("transform", `rotate(${(age * 40) % 360} ${w / 2} ${h / 2})`); }
+      else if (s.state === "done") { tg = tri(0); const p = Math.min(1, age / 0.36); const k = still ? 1 : 1 + Math.sin(p * Math.PI) * 0.28; sc = [k, k, k]; }
+      else if (s.state === "error") { const sh = still || age > 0.42 ? 0 : Math.sin(age * 2 * Math.PI * 7) * 6 * (1 - age / 0.42); tg = row(t).map(p => ({ x: p.x + sh, y: p.y })); }
+      else if (s.state === "listening") { tg = row(still ? 0 : t); sc = tg.map(p => 1 + Math.max(0, (h / 2 - p.y) / (d * 6))); }
+      else { tg = row(t); const b = still ? 1 : 1 + 0.04 * (1 + Math.sin(t * 2 * Math.PI / 2.4)); sc = [b, b, b]; }
+      const f = still ? 1 : (s.state === "listening" ? 0.5 : 0.16);
+      cs.forEach((c, i) => { s.pos[i].x += (tg[i].x - s.pos[i].x) * f; s.pos[i].y += (tg[i].y - s.pos[i].y) * f; c.setAttribute("cx", s.pos[i].x.toFixed(2)); c.setAttribute("cy", s.pos[i].y.toFixed(2)); c.setAttribute("r", (d / 2 * sc[i]).toFixed(2)); });
+    }
+    requestAnimationFrame(frame);
+    return (st) => { s.state = st; s.since = performance.now(); ring.style.opacity = st === "transcribing" ? 0.3 : 0; cs.forEach(c => c.setAttribute("fill", st === "error" ? "#e5574f" : "#f4c430")); };
+  }
+  const set = makeDots(document.getElementById("dots"), 18, false);
+  makeDots(document.getElementById("dots2"), 10, true);
+  const note = document.getElementById("note");
+  const buttons = document.querySelectorAll(".state-tabs button");
+  const choose = (st) => { set(st); note.textContent = NOTES[st]; buttons.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === st))); };
+  buttons.forEach(b => b.addEventListener("click", () => choose(b.dataset.s)));
+  choose("listening");
+})();
+</script>
