@@ -20,7 +20,7 @@ fn system_prompt(mode: OutputMode) -> String {
         OutputMode::Tamil => "The text is Tamil in Tamil script, often with English words mixed in. If an English word was transcribed in Tamil script (for example மீட்டிங், லேட், ஆபீஸ்), write it in English letters (meeting, late, office). Keep everything else in Tamil script exactly as spoken, including colloquial forms.",
         OutputMode::Tanglish => "The text is Tamil written in English letters (Tanglish), possibly mixed with English. Keep it in English letters; keep the casual spelling; do not convert it to Tamil script.",
         OutputMode::English => "The text is English, possibly spoken with an Indian accent and with a few Tamil words. Keep Tamil words as they are.",
-        OutputMode::Auto => "The text may be Tamil (Tamil script), English, or a mix. Keep each part in the script it is in, except English words that were transcribed in Tamil script — write those in English letters.",
+        OutputMode::Auto => "The text may be Tamil (Tamil script), English, or a mix. Keep each part in the script it is in, except English words that were transcribed in Tamil script: write those in English letters.",
     };
     format!("{RULES}\n\n{style}")
 }
@@ -138,7 +138,7 @@ pub async fn status(cfg: &PolishConfig) -> PolishStatus {
             reachable: false,
             models: Vec::new(),
             error: Some(if e.to_string().contains("connect") || e.is::<reqwest::Error>() {
-                format!("Ollama is not running at {} — install it from ollama.com and run `ollama pull {}`", cfg.endpoint, cfg.model)
+                format!("Ollama is not running at {}. Install it from ollama.com and run `ollama pull {}`", cfg.endpoint, cfg.model)
             } else {
                 e.to_string()
             }),

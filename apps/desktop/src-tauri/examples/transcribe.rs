@@ -3,6 +3,8 @@
 //!
 //!   cargo run --release --example transcribe -- <file.wav>… [--model large-v3-turbo-q5]
 //!       [--mode auto|tamil|tanglish|english] [--preview] [--models-dir DIR]
+//!       [--mic SECONDS]   record from the microphone through the live start/preview/finish path
+//!       [--fetch-vad]     download the Silero VAD model if it is missing
 //!
 //! Models are read from the app's models folder (download them in Mozhi → Models).
 #![allow(dead_code)]
@@ -99,6 +101,7 @@ fn main() -> anyhow::Result<()> {
     let mut mode = OutputMode::Auto;
     let mut preview = false;
     let mut mic_secs: Option<f32> = None;
+    let mut fetch_vad = false;
     let mut dir = default_models_dir();
     let mut args = std::env::args().skip(1);
     while let Some(a) = args.next() {
@@ -113,6 +116,7 @@ fn main() -> anyhow::Result<()> {
                 }
             }
             "--preview" => preview = true,
+            "--fetch-vad" => fetch_vad = true,
             "--mic" => mic_secs = args.next().and_then(|s| s.parse::<f32>().ok()),
             "--models-dir" => dir = PathBuf::from(args.next().unwrap_or_default()),
             _ => files.push(a),
@@ -127,6 +131,11 @@ fn main() -> anyhow::Result<()> {
         std::process::exit(2);
     }
 
+    if fetch_vad {
+        let t = Instant::now();
+        tokio::runtime::Runtime::new()?.block_on(engine::models::ensure_vad(&dir))?;
+        println!("VAD model ready in {:.2}s", t.elapsed().as_secs_f32());
+    }
     let engine = engine::Engine::new(dir);
     let id = if model.is_empty() { engine::models::default_model_id().to_string() } else { model };
     let t = Instant::now();

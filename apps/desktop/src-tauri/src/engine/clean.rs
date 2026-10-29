@@ -46,7 +46,9 @@ pub fn clean(text: &str, voiced_ms: u64) -> String {
     s = s.replace(['♪', '♫', '�'], "");
     s = drop_junk_sentences(&s);
     s = collapse_repeats(&s);
+    s = collapse_substring_loops(&s);
     s = collapse_char_runs(&s);
+    s = soften_dashes(&s);
     s = tidy_spaces(&s);
     let bare: String = s.chars().filter(|c| c.is_alphanumeric() || c.is_whitespace() || is_tamil(*c)).collect::<String>().trim().to_lowercase();
     if voiced_ms < 1200 && JUNK_WHOLE_SHORT.contains(&bare.as_str()) {
@@ -56,6 +58,11 @@ pub fn clean(text: &str, voiced_ms: u64) -> String {
         return String::new();
     }
     s
+}
+
+/// Whisper likes em dashes in English; Mozhi's house style writes them as commas.
+fn soften_dashes(s: &str) -> String {
+    s.replace(" — ", ", ").replace(" —", ",").replace("— ", ", ").replace('—', ", ").replace(" ,", ",")
 }
 
 fn is_tamil(c: char) -> bool {
@@ -121,16 +128,21 @@ fn drop_junk_sentences(text: &str) -> String {
         .join("")
 }
 
+const NUMBER_WORDS: &[&str] = &[
+    "zero", "oh", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "double", "triple",
+    "பூஜ்ஜியம்", "ஒன்று", "ஒண்ணு", "இரண்டு", "ரெண்டு", "மூன்று", "மூணு", "நான்கு", "நாலு", "ஐந்து", "அஞ்சு", "ஆறு", "ஏழு", "எட்டு", "ஒன்பது",
+];
+
 /// "naan naan naan naan" → "naan"; "go home go home go home" → "go home".
-/// Any n-gram (n ≤ 8 words) repeated three or more times in a row collapses to one;
-/// a phrase of four or more words repeated even twice is a decoder loop, not speech.
+/// Any short n-gram repeated three or more times in a row collapses to one; a phrase of
+/// four or more words (up to 32) repeated even twice is a decoder loop, not speech.
 fn collapse_repeats(text: &str) -> String {
     let mut words: Vec<&str> = text.split_whitespace().collect();
     let norm = |w: &str| w.trim_matches(|c: char| c.is_ascii_punctuation() || c == '…').to_lowercase();
     let mut changed = true;
     while changed {
         changed = false;
-        'outer: for n in 1..=8usize {
+        'outer: for n in 1..=32usize {
             let min_reps = if n >= 4 { 2 } else { 3 };
             if words.len() < n * min_reps {
                 continue;
@@ -142,7 +154,9 @@ fn collapse_repeats(text: &str) -> String {
                 while i + (reps + 1) * n <= words.len() && words[i + reps * n..i + (reps + 1) * n].iter().map(|w| norm(w)).collect::<Vec<_>>() == gram {
                     reps += 1;
                 }
-                if reps >= 3 || (reps >= 2 && n >= 4) {
+                // Dictated numbers repeat legitimately: "nine nine nine", "9 9 9".
+                let numeric = gram.iter().all(|w| w.chars().all(|c| c.is_ascii_digit()) || NUMBER_WORDS.contains(&w.as_str()));
+                if !numeric && (reps >= 3 || (reps >= 2 && n >= 4)) {
                     // keep the last copy (it carries the trailing punctuation)
                     words.drain(i..i + (reps - 1) * n);
                     changed = true;
@@ -153,6 +167,46 @@ fn collapse_repeats(text: &str) -> String {
         }
     }
     words.join(" ")
+}
+
+const LOOP_MAX_UNIT: usize = 16;
+const LOOP_MIN_REPS: usize = 4;
+
+/// Finds a unit of 2–16 characters repeated four or more times back to back
+/// ("கும்கும்கும்கும்…"). Returns (start, unit length, repetitions) in chars.
+fn find_substring_loop(chars: &[char]) -> Option<(usize, usize, usize)> {
+    for unit in 2..=LOOP_MAX_UNIT {
+        if chars.len() < unit * LOOP_MIN_REPS {
+            break;
+        }
+        let mut i = 0;
+        while i + unit * LOOP_MIN_REPS <= chars.len() {
+            let mut reps = 1;
+            while i + (reps + 1) * unit <= chars.len() && chars[i + reps * unit..i + (reps + 1) * unit] == chars[i..i + unit] {
+                reps += 1;
+            }
+            if reps >= LOOP_MIN_REPS && chars[i..i + unit].iter().any(|c| c.is_alphabetic()) {
+                return Some((i, unit, reps));
+            }
+            i += 1;
+        }
+    }
+    None
+}
+
+/// True when Whisper got stuck repeating itself — the decode should be retried.
+pub fn has_loop(text: &str) -> bool {
+    let chars: Vec<char> = text.chars().collect();
+    find_substring_loop(&chars).is_some() || collapse_repeats(text).chars().count() * 3 < text.split_whitespace().collect::<Vec<_>>().join(" ").chars().count() * 2
+}
+
+/// "நான்னைக்கும்கும்கும்கும்கும்" → "நான்னைக்கும்".
+fn collapse_substring_loops(text: &str) -> String {
+    let mut chars: Vec<char> = text.chars().collect();
+    while let Some((start, unit, reps)) = find_substring_loop(&chars) {
+        chars.drain(start + unit..start + unit * reps);
+    }
+    chars.into_iter().collect()
 }
 
 /// "ஆஆஆஆஆஆ" / "!!!!!!" → at most three of the same character.
@@ -184,6 +238,14 @@ fn tidy_spaces(text: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn em_dashes_become_commas() {
+        assert_eq!(soften_dashes("Yes — that works"), "Yes, that works");
+        assert_eq!(soften_dashes("Yes—that works"), "Yes, that works");
+        assert_eq!(soften_dashes("நாளைக்கு — சரி"), "நாளைக்கு, சரி");
+    }
+
     use super::*;
 
     #[test]
@@ -211,6 +273,23 @@ mod tests {
             "Please share the design files before the meeting."
         );
         assert_eq!(clean("I said no, no.", 3000), "I said no, no.");
+        assert_eq!(
+            clean("I will send the quarterly report by tomorrow evening and share the files before. I will send the quarterly report by tomorrow evening and share the files before.", 6000),
+            "I will send the quarterly report by tomorrow evening and share the files before."
+        );
+        assert_eq!(clean("நான்னைக்கும்கும்கும்கும்கும்கும்", 3000), "நான்னைக்கும்");
+        assert_eq!(clean("hahahahahaha that's funny", 3000), "ha that's funny");
+        assert_eq!(clean("அம்மா அப்பா", 3000), "அம்மா அப்பா");
+    }
+
+    #[test]
+    fn detects_loops() {
+        assert!(has_loop("நான்னைக்கும்கும்கும்கும்கும்கும்"));
+        assert!(has_loop("சரி, நாம் சரி, நாம் சரி, நாம் சரி, நாம் சரி, நாம்"));
+        assert!(!has_loop("நான் நாளைக்கு வருவேன், சரியா?"));
+        assert!(!has_loop("Please call me at 9 9 9 0 0."));
+        assert_eq!(clean("my number is nine nine nine eight", 3000), "my number is nine nine nine eight");
+        assert_eq!(clean("PIN 4 4 4 4", 3000), "PIN 4 4 4 4");
     }
 
     #[test]

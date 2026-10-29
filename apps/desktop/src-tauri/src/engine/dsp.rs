@@ -136,6 +136,28 @@ pub fn is_digital_silence(audio: &[f32]) -> bool {
     !audio.is_empty() && audio.iter().all(|v| *v == 0.0)
 }
 
+/// 16 kHz mono 16-bit WAV, for debugging.
+pub fn write_wav(path: &std::path::Path, audio: &[f32]) -> std::io::Result<()> {
+    let data_len = (audio.len() * 2) as u32;
+    let mut b = Vec::with_capacity(44 + data_len as usize);
+    b.extend_from_slice(b"RIFF");
+    b.extend_from_slice(&(36 + data_len).to_le_bytes());
+    b.extend_from_slice(b"WAVEfmt ");
+    b.extend_from_slice(&16u32.to_le_bytes());
+    b.extend_from_slice(&1u16.to_le_bytes());
+    b.extend_from_slice(&1u16.to_le_bytes());
+    b.extend_from_slice(&(SAMPLE_RATE as u32).to_le_bytes());
+    b.extend_from_slice(&(SAMPLE_RATE as u32 * 2).to_le_bytes());
+    b.extend_from_slice(&2u16.to_le_bytes());
+    b.extend_from_slice(&16u16.to_le_bytes());
+    b.extend_from_slice(b"data");
+    b.extend_from_slice(&data_len.to_le_bytes());
+    for s in audio {
+        b.extend_from_slice(&((s.clamp(-1.0, 1.0) * 32767.0) as i16).to_le_bytes());
+    }
+    std::fs::write(path, b)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

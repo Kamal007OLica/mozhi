@@ -9,13 +9,13 @@
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::mpsc;
 use std::sync::Arc;
-use std::thread::{self, JoinHandle};
+use std::thread;
 use std::time::Duration;
 
 use anyhow::{anyhow, Context};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, SampleFormat, SizedSample};
-use parking_lot::RwLock;
+use parking_lot::{Mutex, RwLock};
 
 use super::dsp::{LevelMeter, SAMPLE_RATE};
 use super::resample::Resampler;
@@ -38,95 +38,61 @@ pub fn input_devices() -> Vec<String> {
 
 pub struct Recorder {
     stop: Arc<AtomicBool>,
-    stream_thread: Option<JoinHandle<()>>,
-    pump_thread: Option<JoinHandle<()>>,
+    /// Signalled by the mic thread once it has drained and released the device.
+    done: Option<mpsc::Receiver<()>>,
     audio: Arc<RwLock<Vec<f32>>>,
     dropped: Arc<AtomicU64>,
+    /// A device error that happened after `start` returned.
+    error: Arc<Mutex<Option<String>>>,
 }
 
+/// Longest `start` blocks waiting for the device. Opening CoreAudio takes ~200 ms on a
+/// MacBook, and a pending permission prompt blocks indefinitely; the overlay must not wait
+/// for either. Fast failures (no device at all) still surface synchronously.
+const OPEN_WAIT: Duration = Duration::from_millis(40);
+
 impl Recorder {
-    /// Opens the device and starts streaming. Returns once the stream is running.
+    /// Starts opening the device on the `mozhi-mic` thread, which then streams, resamples and
+    /// meters until stopped. Returns within ~40 ms.
     pub fn start(device: Option<&str>, sink: Arc<dyn EngineSink>) -> anyhow::Result<Self> {
         let stop = Arc::new(AtomicBool::new(false));
         let dropped = Arc::new(AtomicU64::new(0));
         let audio = Arc::new(RwLock::new(Vec::with_capacity(SAMPLE_RATE * 60)));
-        let (ready_tx, ready_rx) = mpsc::sync_channel::<anyhow::Result<(u32, rtrb::Consumer<f32>)>>(1);
+        let error = Arc::new(Mutex::new(None));
+        let (ready_tx, ready_rx) = mpsc::sync_channel::<Result<(), String>>(1);
+        let (done_tx, done_rx) = mpsc::sync_channel::<()>(1);
 
         let device_name = device.map(str::to_owned);
-        let stop_s = stop.clone();
-        let dropped_s = dropped.clone();
-        let stream_thread = thread::Builder::new()
+        let (stop_t, dropped_t, audio_t, error_t) = (stop.clone(), dropped.clone(), audio.clone(), error.clone());
+        thread::Builder::new()
             .name("mozhi-mic".into())
-            .spawn(move || match open_stream(device_name.as_deref(), dropped_s) {
-                Ok((stream, rate, consumer)) => {
-                    if let Err(e) = stream.play() {
-                        let _ = ready_tx.send(Err(anyhow!("microphone device could not start: {e}")));
-                        return;
+            .spawn(move || {
+                let opened = open_stream(device_name.as_deref(), dropped_t).and_then(|(stream, rate, consumer)| {
+                    stream.play().map_err(|e| anyhow!("microphone device could not start: {e}"))?;
+                    Ok((stream, rate, consumer))
+                });
+                match opened {
+                    Ok((stream, rate, consumer)) => {
+                        let _ = ready_tx.try_send(Ok(()));
+                        pump(rate, consumer, &stop_t, &audio_t, sink.as_ref());
+                        drop(stream);
                     }
-                    let _ = ready_tx.send(Ok((rate, consumer)));
-                    while !stop_s.load(Ordering::Acquire) {
-                        thread::park_timeout(Duration::from_millis(50));
+                    Err(e) => {
+                        let msg = format!("{e:#}");
+                        log::error!("{msg}");
+                        *error_t.lock() = Some(msg.clone());
+                        let _ = ready_tx.try_send(Err(msg));
                     }
-                    drop(stream);
                 }
-                Err(e) => {
-                    let _ = ready_tx.send(Err(e));
-                }
+                let _ = done_tx.try_send(());
             })
             .context("spawn microphone thread")?;
 
-        let (rate, mut consumer) = match ready_rx.recv_timeout(Duration::from_secs(3)) {
-            Ok(Ok(v)) => v,
-            Ok(Err(e)) => {
-                stop.store(true, Ordering::Release);
-                return Err(e);
-            }
-            Err(_) => {
-                stop.store(true, Ordering::Release);
-                return Err(anyhow!("microphone device did not respond (permission prompt pending?)"));
-            }
-        };
-
-        let stop_p = stop.clone();
-        let audio_p = audio.clone();
-        let pump_thread = thread::Builder::new()
-            .name("mozhi-pump".into())
-            .spawn(move || {
-                let mut resampler = Resampler::new(rate, SAMPLE_RATE as u32);
-                let mut meter = LevelMeter::new();
-                let mut raw = Vec::with_capacity(rate as usize / 10);
-                let mut out = Vec::with_capacity(SAMPLE_RATE / 10);
-                loop {
-                    let finished = stop_p.load(Ordering::Acquire);
-                    raw.clear();
-                    let n = consumer.slots();
-                    if n > 0 {
-                        if let Ok(chunk) = consumer.read_chunk(n) {
-                            let (a, b) = chunk.as_slices();
-                            raw.extend_from_slice(a);
-                            raw.extend_from_slice(b);
-                            chunk.commit_all();
-                        }
-                    }
-                    out.clear();
-                    resampler.process(&raw, &mut out);
-                    if finished {
-                        resampler.flush(&mut out);
-                    }
-                    if !out.is_empty() {
-                        meter.push(&out, |l| sink.level(l));
-                        audio_p.write().extend_from_slice(&out);
-                    }
-                    if finished {
-                        sink.level(0.0);
-                        return;
-                    }
-                    thread::sleep(Duration::from_millis(10));
-                }
-            })
-            .context("spawn audio pump")?;
-
-        Ok(Self { stop, stream_thread: Some(stream_thread), pump_thread: Some(pump_thread), audio, dropped })
+        if let Ok(Err(e)) = ready_rx.recv_timeout(OPEN_WAIT) {
+            stop.store(true, Ordering::Release);
+            return Err(anyhow!(e));
+        }
+        Ok(Self { stop, done: Some(done_rx), audio, dropped, error })
     }
 
     /// The growing 16 kHz mono buffer, for the live preview.
@@ -134,42 +100,70 @@ impl Recorder {
         self.audio.clone()
     }
 
-    /// Stops the stream, drains the ring and returns everything recorded.
-    pub fn stop(mut self) -> Vec<f32> {
+    /// Stops the stream, drains the ring and returns everything recorded — or the device
+    /// error if the microphone never opened.
+    pub fn stop(mut self) -> anyhow::Result<Vec<f32>> {
         self.halt();
         let dropped = self.dropped.load(Ordering::Relaxed);
         if dropped > 0 {
             log::warn!("audio ring overflowed, dropped {dropped} samples");
         }
-        std::mem::take(&mut *self.audio.write())
+        let audio = std::mem::take(&mut *self.audio.write());
+        match self.error.lock().take() {
+            Some(e) if audio.is_empty() => Err(anyhow!(e)),
+            _ => Ok(audio),
+        }
     }
 
     fn halt(&mut self) {
-        // Let the last callback land before the pump does its final drain.
-        thread::sleep(Duration::from_millis(30));
-        self.stop.store(true, Ordering::Release);
-        if let Some(t) = self.stream_thread.take() {
-            t.thread().unpark();
-            let _ = t.join();
-        }
-        if let Some(t) = self.pump_thread.take() {
-            let _ = t.join();
+        if let Some(done) = self.done.take() {
+            // Let the last callback land before the final drain.
+            thread::sleep(Duration::from_millis(30));
+            self.stop.store(true, Ordering::Release);
+            // A device stuck behind a permission prompt never finishes; don't hang on it.
+            let _ = done.recv_timeout(Duration::from_secs(1));
         }
     }
 }
 
 impl Drop for Recorder {
     fn drop(&mut self) {
-        if self.stream_thread.is_some() || self.pump_thread.is_some() {
-            self.stop.store(true, Ordering::Release);
-            if let Some(t) = self.stream_thread.take() {
-                t.thread().unpark();
-                let _ = t.join();
-            }
-            if let Some(t) = self.pump_thread.take() {
-                let _ = t.join();
+        self.stop.store(true, Ordering::Release);
+    }
+}
+
+/// Moves audio from the real-time ring to the shared 16 kHz buffer every 10 ms.
+fn pump(rate: u32, mut consumer: rtrb::Consumer<f32>, stop: &AtomicBool, audio: &RwLock<Vec<f32>>, sink: &dyn EngineSink) {
+    let mut resampler = Resampler::new(rate, SAMPLE_RATE as u32);
+    let mut meter = LevelMeter::new();
+    let mut raw = Vec::with_capacity(rate as usize / 10);
+    let mut out = Vec::with_capacity(SAMPLE_RATE / 10);
+    loop {
+        let finished = stop.load(Ordering::Acquire);
+        raw.clear();
+        let n = consumer.slots();
+        if n > 0 {
+            if let Ok(chunk) = consumer.read_chunk(n) {
+                let (a, b) = chunk.as_slices();
+                raw.extend_from_slice(a);
+                raw.extend_from_slice(b);
+                chunk.commit_all();
             }
         }
+        out.clear();
+        resampler.process(&raw, &mut out);
+        if finished {
+            resampler.flush(&mut out);
+        }
+        if !out.is_empty() {
+            meter.push(&out, |l| sink.level(l));
+            audio.write().extend_from_slice(&out);
+        }
+        if finished {
+            sink.level(0.0);
+            return;
+        }
+        thread::sleep(Duration::from_millis(10));
     }
 }
 
@@ -182,7 +176,7 @@ fn find_device(host: &cpal::Host, name: Option<&str>) -> anyhow::Result<cpal::De
         }
         log::warn!("input device {name:?} not found, using the default");
     }
-    host.default_input_device().ok_or_else(|| anyhow!("no input device available — connect a microphone"))
+    host.default_input_device().ok_or_else(|| anyhow!("no input device available. Connect a microphone"))
 }
 
 fn open_stream(name: Option<&str>, dropped: Arc<AtomicU64>) -> anyhow::Result<(cpal::Stream, u32, rtrb::Consumer<f32>)> {

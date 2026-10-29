@@ -18,6 +18,7 @@ pub mod models;
 pub mod polish;
 mod resample;
 pub mod translit;
+mod vad;
 mod whisper;
 
 use std::path::PathBuf;
@@ -58,6 +59,15 @@ const PREVIEW_EVERY: Duration = Duration::from_millis(700);
 const PREVIEW_WINDOW_S: usize = 25;
 const MIN_SPEECH_MS: u64 = 300;
 const MODEL_WAIT: Duration = Duration::from_secs(180);
+const LID_AFTER: usize = SAMPLE_RATE * 3 / 2;
+const LID_AGAIN: usize = SAMPLE_RATE * 8;
+
+/// Tamil or English, decided by language ID while the user speaks (Auto mode only).
+type Lid = Arc<Mutex<Option<&'static str>>>;
+
+/// Set while language ID runs. Its full-window encode saturates the GPU, so the preview
+/// skips ticks instead of fighting it (measured: a 1 s preview pass took 7 s alongside it).
+type Busy = Arc<AtomicBool>;
 
 /// A model that may still be loading.
 type Slot = Arc<(Mutex<Option<Result<Arc<Model>, String>>>, Condvar)>;
@@ -84,6 +94,11 @@ struct Preview {
 }
 
 impl Preview {
+    fn detach(self) {
+        self.stop.store(true, Ordering::SeqCst);
+        self.handle.thread().unpark();
+    }
+
     fn shutdown(self) {
         self.stop.store(true, Ordering::SeqCst);
         self.handle.thread().unpark();
@@ -96,6 +111,8 @@ struct Session {
     opts: RecordOptions,
     slot: Slot,
     preview: Option<Preview>,
+    lid: Lid,
+    lid_stop: Option<Arc<AtomicBool>>,
 }
 
 struct Inner {
@@ -166,29 +183,44 @@ impl Engine {
             }
         }
 
+        let lid: Lid = Arc::new(Mutex::new(None));
+        let busy: Busy = Arc::new(AtomicBool::new(false));
+        let lid_stop = (opts.mode == OutputMode::Auto).then(|| spawn_lid(recorder.shared(), slot.clone(), lid.clone(), busy.clone()));
         let preview = if opts.live_preview {
-            Some(spawn_preview(recorder.shared(), slot.clone(), opts.mode, sink))
+            Some(spawn_preview(self.inner.models_dir.clone(), recorder.shared(), slot.clone(), opts.mode, lid.clone(), busy, sink))
         } else {
             None
         };
-        *self.inner.session.lock() = Some(Session { recorder, opts, slot, preview });
+        *self.inner.session.lock() = Some(Session { recorder, opts, slot, preview, lid, lid_stop });
         Ok(())
     }
 
     /// Stops capture and runs the final transcription. Blocking — call from a worker thread.
     pub fn finish(&self) -> anyhow::Result<TranscriptResult> {
         let session = self.inner.session.lock().take().ok_or_else(|| anyhow!("not recording"))?;
+        // Signal, don't join: a preview pass may be mid-decode and the final pass must not wait for it.
         if let Some(p) = session.preview {
-            p.shutdown();
+            p.detach();
         }
-        let audio = session.recorder.stop();
+        let audio = session.recorder.stop()?;
         if dsp::is_digital_silence(&audio) && audio.len() > SAMPLE_RATE * 4 / 10 {
             return Err(anyhow!(
-                "microphone permission denied — Mozhi received only silence. Allow it in System Settings → Privacy & Security → Microphone"
+                "microphone permission denied: Mozhi received only silence. Allow it in System Settings → Privacy & Security → Microphone"
             ));
         }
+        if let Some(stop) = &session.lid_stop {
+            stop.store(true, Ordering::SeqCst);
+        }
         let slot = session.slot;
-        run_final(audio, session.opts.mode, Quality::Final, || wait_slot(&slot, MODEL_WAIT))
+        let model = wait_slot(&slot, MODEL_WAIT)?;
+        let mut lid = *session.lid.lock();
+        if session.opts.mode == OutputMode::Auto && lid.is_none() && audio.len() >= SAMPLE_RATE / 2 {
+            // Too short for the background pass to have finished: decide now.
+            lid = model.identify(&audio).ok().map(|(l, _)| l);
+        }
+        let lang = lang_for(session.opts.mode, lid);
+        log::debug!("final pass: mode {:?}, language id {lid:?} → {lang:?}", session.opts.mode);
+        run_final(&self.inner.models_dir, audio, session.opts.mode, lang, Quality::Final, || Ok(model))
     }
 
     /// Transcribes recorded audio (any sample rate, mono) exactly like a dictation would —
@@ -202,7 +234,10 @@ impl Engine {
         r.flush(&mut audio);
         let quality = if preview { Quality::Preview } else { Quality::Final };
         let id = if model_id.is_empty() { models::default_model_id() } else { model_id };
-        run_final(audio, mode, quality, || self.load(id))
+        let model = self.load(id)?;
+        // In the app, language ID runs while the user speaks; do it up front here.
+        let lid = if mode == OutputMode::Auto && audio.len() >= LID_AFTER { model.identify(&audio).ok().map(|(l, _)| l) } else { None };
+        run_final(&self.inner.models_dir, audio, mode, lang_for(mode, lid), quality, || Ok(model))
     }
 
     /// Stops capture and discards audio. Safe to call at any time.
@@ -256,49 +291,77 @@ impl Engine {
 }
 
 /// Shared tail of every transcription: find speech, normalise, decode, clean, convert.
-fn run_final(audio: Vec<f32>, mode: OutputMode, quality: Quality, model: impl FnOnce() -> anyhow::Result<Arc<Model>>) -> anyhow::Result<TranscriptResult> {
+fn run_final(
+    models_dir: &std::path::Path,
+    audio: Vec<f32>,
+    mode: OutputMode,
+    lang: Lang,
+    quality: Quality,
+    model: impl FnOnce() -> anyhow::Result<Arc<Model>>,
+) -> anyhow::Result<TranscriptResult> {
     let audio_ms = (audio.len() * 1000 / SAMPLE_RATE) as u64;
-    let speech = dsp::find_speech(&audio);
-    if speech.voiced_ms < MIN_SPEECH_MS {
+    let (mut clip, voiced_ms) = speech_only(models_dir, &audio);
+    if voiced_ms < MIN_SPEECH_MS {
         return Ok(TranscriptResult { text: String::new(), raw: String::new(), language: String::new(), audio_ms, inference_ms: 0 });
     }
-    let mut clip = audio[speech.start..speech.end].to_vec();
     dsp::normalize(&mut clip);
+    if let Some(path) = std::env::var_os("MOZHI_DEBUG_WAV") {
+        // Developer aid: the exact audio the final pass sees.
+        let _ = dsp::write_wav(std::path::Path::new(&path), &audio);
+        let _ = dsp::write_wav(&std::path::Path::new(&path).with_extension("clip.wav"), &clip);
+    }
 
     let model = model()?;
     let t = Instant::now();
-    let (raw, lang) = model.transcribe(&clip, &Decode { lang: lang_for(mode), quality, previous: None, abort: None })?;
+    let (raw, lang) = model.transcribe(&clip, &Decode { lang, quality, previous: None, abort: None })?;
     let inference_ms = t.elapsed().as_millis() as u64;
-    let cleaned = clean::clean(&raw, speech.voiced_ms);
+    let cleaned = clean::clean(&raw, voiced_ms);
     let text = finalize(&cleaned, mode);
     log::info!(
         "transcribed {:.1}s ({} ms voiced) in {inference_ms} ms with {} [{lang}]",
         audio_ms as f32 / 1000.0,
-        speech.voiced_ms,
+        voiced_ms,
         model.id
     );
     Ok(TranscriptResult { text, raw: raw.trim().to_string(), language: lang.into(), audio_ms, inference_ms })
 }
 
+/// The speech in `audio` with silence and noise removed, plus voiced time. Silero VAD when
+/// its model is present, otherwise an energy threshold.
+fn speech_only(models_dir: &std::path::Path, audio: &[f32]) -> (Vec<f32>, u64) {
+    if let Some(map) = vad::Vad::load(models_dir).and_then(|mut v| v.speech(audio)) {
+        return (vad::splice(audio, &map), map.voiced_ms);
+    }
+    let speech = dsp::find_speech(audio);
+    (audio[speech.start..speech.end].to_vec(), speech.voiced_ms)
+}
+
 fn teardown(session: Session) {
+    if let Some(stop) = &session.lid_stop {
+        stop.store(true, Ordering::SeqCst);
+    }
     if let Some(p) = session.preview {
         p.shutdown();
     }
-    drop(session.recorder.stop());
+    let _ = session.recorder.stop();
 }
 
-fn lang_for(mode: OutputMode) -> Lang {
-    match mode {
-        OutputMode::Tamil | OutputMode::Tanglish => Lang::Tamil,
-        OutputMode::English => Lang::English,
-        OutputMode::Auto => Lang::Auto,
+/// Auto mode uses the language ID result when there is one; otherwise it decodes as
+/// Tamil and labels by script (see `Model::transcribe`).
+fn lang_for(mode: OutputMode, lid: Option<&'static str>) -> Lang {
+    match (mode, lid) {
+        (OutputMode::Tamil | OutputMode::Tanglish, _) => Lang::Tamil,
+        (OutputMode::English, _) => Lang::English,
+        (OutputMode::Auto, Some("en")) => Lang::English,
+        (OutputMode::Auto, Some(_)) => Lang::Tamil,
+        (OutputMode::Auto, None) => Lang::Auto,
     }
 }
 
-/// Whisper language code for a mode (see `Model::transcribe` for why Auto decodes as Tamil).
-fn decode_lang(mode: OutputMode) -> &'static str {
-    match mode {
-        OutputMode::English => "en",
+/// Whisper language code for a preview pass.
+fn decode_lang(mode: OutputMode, lid: Option<&'static str>) -> &'static str {
+    match lang_for(mode, lid) {
+        Lang::English => "en",
         _ => "ta",
     }
 }
@@ -312,7 +375,57 @@ fn finalize(text: &str, mode: OutputMode) -> String {
 
 /// Live preview: transcribes the current window every ~700 ms. Long dictations are
 /// handled in fixed 25 s windows; finished windows are frozen and prefixed.
-fn spawn_preview(audio: Arc<parking_lot::RwLock<Vec<f32>>>, slot: Slot, mode: OutputMode, sink: Arc<dyn EngineSink>) -> Preview {
+/// Language ID for Auto mode, off the critical path: once ~1.5 s of audio exists, and again
+/// at ~8 s only if the first answer was unsure. `finish()` uses whatever result is ready and never waits for it.
+fn spawn_lid(audio: Arc<parking_lot::RwLock<Vec<f32>>>, slot: Slot, lid: Lid, busy: Busy) -> Arc<AtomicBool> {
+    let stop = Arc::new(AtomicBool::new(false));
+    let stop_t = stop.clone();
+    let spawned = thread::Builder::new().name("mozhi-lid".into()).spawn(move || {
+        for at in [LID_AFTER, LID_AGAIN] {
+            loop {
+                if stop_t.load(Ordering::SeqCst) {
+                    return;
+                }
+                if audio.read().len() >= at && peek_slot(&slot).is_some() {
+                    break;
+                }
+                thread::sleep(Duration::from_millis(100));
+            }
+            let Some(model) = peek_slot(&slot) else { return };
+            let head = {
+                let a = audio.read();
+                a[..a.len().min(30 * SAMPLE_RATE)].to_vec()
+            };
+            busy.store(true, Ordering::SeqCst);
+            let result = model.identify(&head);
+            busy.store(false, Ordering::SeqCst);
+            match result {
+                Ok((l, confident)) if !stop_t.load(Ordering::SeqCst) => {
+                    *lid.lock() = Some(l);
+                    if confident {
+                        return;
+                    }
+                }
+                Ok(_) => return,
+                Err(e) => log::warn!("language id: {e:#}"),
+            }
+        }
+    });
+    if let Err(e) = spawned {
+        log::warn!("spawn language id: {e}");
+    }
+    stop
+}
+
+fn spawn_preview(
+    models_dir: PathBuf,
+    audio: Arc<parking_lot::RwLock<Vec<f32>>>,
+    slot: Slot,
+    mode: OutputMode,
+    lid: Lid,
+    busy: Busy,
+    sink: Arc<dyn EngineSink>,
+) -> Preview {
     let stop = Arc::new(AtomicBool::new(false));
     let stop_t = stop.clone();
     let handle = thread::Builder::new()
@@ -323,12 +436,16 @@ fn spawn_preview(audio: Arc<parking_lot::RwLock<Vec<f32>>>, slot: Slot, mode: Ou
             let mut window_start = 0usize;
             let mut last_len = 0usize;
             let mut last_emitted = String::new();
+            let mut vad = vad::Vad::load(&models_dir);
             loop {
                 thread::park_timeout(PREVIEW_EVERY);
                 if stop_t.load(Ordering::SeqCst) {
                     return;
                 }
                 let Some(model) = peek_slot(&slot) else { continue };
+                if busy.load(Ordering::SeqCst) {
+                    continue;
+                }
                 let len = audio.read().len();
                 if len < SAMPLE_RATE * 6 / 10 || len == last_len {
                     continue;
@@ -338,8 +455,8 @@ fn spawn_preview(audio: Arc<parking_lot::RwLock<Vec<f32>>>, slot: Slot, mode: Ou
                 // Close a full window: transcribe it once more and freeze the text.
                 while len - window_start > window {
                     let chunk = audio.read()[window_start..window_start + window].to_vec();
-                    let l = decode_lang(mode);
-                    let opts = Decode { lang: lang_for(mode), quality: Quality::Preview, previous: Some(&frozen), abort: Some(stop_t.clone()) };
+                    let l = decode_lang(mode, *lid.lock());
+                    let opts = Decode { lang: lang_for(mode, *lid.lock()), quality: Quality::Preview, previous: Some(&frozen), abort: Some(stop_t.clone()) };
                     if let Ok(t) = model.transcribe_chunk(&chunk, l, &opts) {
                         let t = clean::clean(&t, 5_000);
                         if !t.is_empty() {
@@ -355,20 +472,35 @@ fn spawn_preview(audio: Arc<parking_lot::RwLock<Vec<f32>>>, slot: Slot, mode: Ou
                     }
                 }
 
-                let mut chunk = audio.read()[window_start..].to_vec();
-                let speech = dsp::find_speech(&chunk);
-                if speech.voiced_ms < 200 {
+                let raw_chunk = audio.read()[window_start..].to_vec();
+                // Whisper invents text from room noise; wait for real speech before showing any.
+                let (mut chunk, voiced_ms) = match vad.as_mut().and_then(|v| v.speech(&raw_chunk)) {
+                    Some(map) => (vad::splice(&raw_chunk, &map), map.voiced_ms),
+                    None => {
+                        let s = dsp::find_speech(&raw_chunk);
+                        (raw_chunk[s.start..s.end].to_vec(), s.voiced_ms)
+                    }
+                };
+                if voiced_ms < 400 {
                     continue;
                 }
                 dsp::normalize(&mut chunk);
 
-                let l = decode_lang(mode);
-                let opts = Decode { lang: lang_for(mode), quality: Quality::Preview, previous: if frozen.is_empty() { None } else { Some(&frozen) }, abort: Some(stop_t.clone()) };
-                let Ok(text) = model.transcribe_chunk(&chunk, l, &opts) else { continue };
+                let l = decode_lang(mode, *lid.lock());
+                let opts = Decode { lang: lang_for(mode, *lid.lock()), quality: Quality::Preview, previous: if frozen.is_empty() { None } else { Some(&frozen) }, abort: Some(stop_t.clone()) };
+                let t = Instant::now();
+                let text = match model.transcribe_chunk(&chunk, l, &opts) {
+                    Ok(text) => text,
+                    Err(e) => {
+                        log::debug!("preview pass skipped: {e:#}");
+                        continue;
+                    }
+                };
+                log::debug!("preview pass: {:.1}s of audio in {:?}", chunk.len() as f32 / SAMPLE_RATE as f32, t.elapsed());
                 if stop_t.load(Ordering::SeqCst) {
                     return;
                 }
-                let text = clean::clean(&text, speech.voiced_ms);
+                let text = clean::clean(&text, voiced_ms);
                 let full = match (frozen.is_empty(), text.is_empty()) {
                     (true, _) => text,
                     (false, true) => frozen.clone(),

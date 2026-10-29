@@ -49,7 +49,7 @@ pub(crate) const CATALOG: &[Entry] = &[
     Entry {
         id: "tamil-small-q8",
         name: "Tamil Small · fine-tuned",
-        description: "Whisper fine-tuned on Tamil by IIT Madras SPRING Lab (vasista22). The most accurate choice for pure Tamil, and light — but Tamil only: English words come out in Tamil script.",
+        description: "Whisper fine-tuned on Tamil by IIT Madras SPRING Lab (vasista22). The most accurate choice for pure Tamil, and light. Tamil only: English words come out in Tamil script.",
         file: "ggml-tamil-small-q8_0.bin",
         url: "https://huggingface.co/Pomni/whisper-tamil-small-ggml-allquants/resolve/main/ggml-tamil-small-q8_0.bin",
         bytes: 264_464_607,
@@ -75,7 +75,7 @@ pub(crate) const CATALOG: &[Entry] = &[
     Entry {
         id: "large-v3-turbo",
         name: "Whisper Large v3 Turbo · full precision",
-        description: "Same as the recommended model without quantisation — marginally more accurate, three times the size.",
+        description: "Same as the recommended model without quantisation. Marginally more accurate, three times the size.",
         file: "ggml-large-v3-turbo.bin",
         url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin",
         bytes: 1_624_555_275,
@@ -197,7 +197,7 @@ pub fn catalog(models_dir: &Path) -> Vec<ModelInfo> {
             .filter_map(|f| {
                 let name = f.file_name().to_string_lossy().to_string();
                 let meta = f.metadata().ok()?;
-                let known = CATALOG.iter().any(|e| e.file == name);
+                let known = CATALOG.iter().any(|e| e.file == name) || name == super::vad::FILE;
                 (meta.is_file() && name.ends_with(".bin") && !known && !name.starts_with('.')).then(|| ModelInfo {
                     id: format!("{CUSTOM_PREFIX}{name}"),
                     name: name.trim_end_matches(".bin").trim_start_matches("ggml-").to_string(),
@@ -232,29 +232,56 @@ pub async fn download(
 ) -> anyhow::Result<()> {
     let e = entry(id).ok_or_else(|| anyhow!("unknown model {id}"))?;
     tokio::fs::create_dir_all(models_dir).await.context("create models folder")?;
-    let dest = models_dir.join(e.file);
-    if dest.is_file() {
-        progress(e.bytes, e.bytes);
+    // The tiny voice-activity model rides along with any speech model.
+    if let Err(err) = ensure_vad(models_dir).await {
+        log::warn!("VAD model download failed (falling back to energy trimming): {err:#}");
+    }
+    fetch(models_dir, e.file, e.url, e.bytes, e.sha256, cancel, progress).await
+}
+
+/// Downloads Silero VAD (~0.9 MB) if it is missing. Dictation works without it, with more
+/// hallucinated text on noisy recordings.
+pub async fn ensure_vad(models_dir: &Path) -> anyhow::Result<()> {
+    use super::vad;
+    if vad::path(models_dir).is_file() {
         return Ok(());
     }
-    let part = models_dir.join(format!("{}.part", e.file));
+    fetch(models_dir, vad::FILE, vad::URL, vad::BYTES, vad::SHA256, Arc::new(AtomicBool::new(false)), |_, _| {}).await
+}
+
+async fn fetch(
+    models_dir: &Path,
+    file: &str,
+    url: &str,
+    bytes: u64,
+    sha256: &str,
+    cancel: Arc<AtomicBool>,
+    progress: impl Fn(u64, u64) + Send + 'static,
+) -> anyhow::Result<()> {
+    let id = file;
+    let dest = models_dir.join(file);
+    if dest.is_file() {
+        progress(bytes, bytes);
+        return Ok(());
+    }
+    let part = models_dir.join(format!("{file}.part"));
     let mut have = tokio::fs::metadata(&part).await.map(|m| m.len()).unwrap_or(0);
-    if have > e.bytes {
+    if have > bytes {
         tokio::fs::remove_file(&part).await.ok();
         have = 0;
     }
 
-    if have < e.bytes {
+    if have < bytes {
         let client = reqwest::Client::builder()
             .user_agent(concat!("Mozhi/", env!("CARGO_PKG_VERSION")))
             .connect_timeout(Duration::from_secs(20))
             .read_timeout(Duration::from_secs(60))
             .build()?;
-        let mut req = client.get(e.url);
+        let mut req = client.get(url);
         if have > 0 {
             req = req.header(reqwest::header::RANGE, format!("bytes={have}-"));
         }
-        let resp = req.send().await.with_context(|| format!("could not reach {HF} — check your connection"))?;
+        let resp = req.send().await.with_context(|| format!("could not reach {HF}. Check your connection"))?;
         let status = resp.status();
         let mut file = if status == reqwest::StatusCode::PARTIAL_CONTENT {
             tokio::fs::OpenOptions::new().append(true).open(&part).await?
@@ -264,36 +291,36 @@ pub async fn download(
         } else {
             bail!("download failed: HTTP {status}");
         };
-        log::info!("downloading {id}: resuming at {have} of {} bytes", e.bytes);
+        log::info!("downloading {id}: resuming at {have} of {bytes} bytes");
 
         let mut stream = resp.bytes_stream();
-        progress(have, e.bytes);
+        progress(have, bytes);
         while let Some(chunk) = stream.next().await {
             if cancel.load(Ordering::Relaxed) {
                 file.flush().await.ok();
                 bail!("download cancelled");
             }
-            let chunk = chunk.context("download interrupted — it will resume next time")?;
+            let chunk = chunk.context("download interrupted. It will resume next time")?;
             file.write_all(&chunk).await?;
             have += chunk.len() as u64;
-            progress(have, e.bytes);
+            progress(have, bytes);
         }
         file.flush().await?;
         file.sync_all().await.ok();
         drop(file);
-        if have != e.bytes {
-            bail!("download incomplete ({have} of {} bytes) — try again to resume", e.bytes);
+        if have != bytes {
+            bail!("download incomplete ({have} of {bytes} bytes). Try again to resume");
         }
     }
 
     let check = part.clone();
     let digest = tokio::task::spawn_blocking(move || sha256_file(&check)).await??;
-    if digest != e.sha256 {
+    if digest != sha256 {
         tokio::fs::remove_file(&part).await.ok();
-        bail!("model file failed verification (checksum mismatch) — please download again");
+        bail!("model file failed verification (checksum mismatch). Please download again");
     }
     tokio::fs::rename(&part, &dest).await.context("finish model download")?;
-    progress(e.bytes, e.bytes);
+    progress(bytes, bytes);
     Ok(())
 }
 
