@@ -1,0 +1,180 @@
+<!doctype html>
+<!--
+  README hero recording. Served by the desktop UI dev server (vite, apps/desktop) at
+  /@fs/<repo>/scripts/readme/stage/hero.html so the iframe below runs the real overlay
+  (/overlay.html, which plays its built-in demo when it is not inside Tauri).
+  This page only paints the desktop around it and reacts to the overlay's phase.
+-->
+<html lang="ta">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../brand/fonts/fonts.css" />
+    <link rel="stylesheet" href="../../../brand/tokens.css" />
+    <style>
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1280px; height: 720px; overflow: hidden; }
+      body {
+        position: relative; isolation: isolate;
+        font-family: var(--mz-font-ui); color: var(--mz-ink);
+        background: radial-gradient(120% 90% at 30% 10%, #d21c22 0%, var(--mz-kumkum) 45%, #8f0f14 100%);
+      }
+      body::after { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--mz-grain); mix-blend-mode: multiply; opacity: .5; }
+      .kolam { position: absolute; z-index: -1; left: -120px; top: -90px; width: 520px; opacity: .13; }
+      .vimana { position: absolute; z-index: -1; right: 36px; bottom: -6px; height: 690px; image-rendering: pixelated; opacity: .95; }
+
+      .menubar {
+        position: absolute; inset: 0 0 auto 0; height: 30px; display: flex; align-items: center; gap: 22px; padding: 0 18px;
+        font: 600 13px/1 var(--mz-font-ui); color: var(--mz-paper); background: rgb(23 17 14 / .32); backdrop-filter: blur(14px);
+      }
+      .menubar b { font-weight: 800; }
+      .menubar .right { margin-left: auto; display: flex; align-items: center; gap: 16px; font-weight: 500; }
+      .menubar .tray { display: grid; place-items: center; width: 26px; height: 22px; border-radius: 6px; background: rgb(244 196 48 / .22); transition: background .3s; }
+      .menubar .tray.on { background: rgb(244 196 48 / .55); }
+      .menubar .tray img { width: 15px; }
+
+      .window {
+        position: absolute; left: 150px; top: 48px; width: 900px; height: 392px; display: grid; grid-template-rows: auto 1fr;
+        background: var(--mz-surface); border-radius: 14px; overflow: hidden;
+        box-shadow: 0 30px 70px -20px rgb(0 0 0 / .55), 0 0 0 1px rgb(23 17 14 / .25);
+      }
+      .bar { display: flex; align-items: center; gap: 14px; padding: 11px 14px; background: var(--mz-olai); border-bottom: 1px solid var(--mz-line); font: 600 12.5px/1 var(--mz-font-mono); color: var(--mz-karungal); }
+      .lights { display: flex; gap: 7px; }
+      .lights i { width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; }
+      .lights i:nth-child(2) { background: #febc2e; }
+      .lights i:nth-child(3) { background: #28c840; }
+      .body { display: grid; grid-template-columns: 190px 1fr; min-height: 0; }
+      .side { padding: 16px 12px; background: #2a211c; color: var(--mz-chandanam); font-size: 14px; display: grid; align-content: start; gap: 4px; }
+      .side h4 { margin: 0 8px 10px; font: 800 15px/1 var(--mz-font-ui); color: var(--mz-paper); }
+      .side span { padding: 6px 8px; border-radius: 6px; }
+      .side span.on { background: var(--mz-kumkum); color: var(--mz-paper); font-weight: 700; }
+      .main { display: grid; grid-template-rows: 1fr auto; min-height: 0; }
+      .thread { padding: 18px 22px 8px; display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; overflow: hidden; }
+      .msg { display: grid; grid-template-columns: 36px 1fr; gap: 10px; align-items: start; animation: in .45s var(--mz-ease-spring); }
+      .msg .av { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; font: 800 14px/1 var(--mz-font-ui); color: #fff; }
+      .msg b { font-size: 14px; } .msg time { margin-left: 8px; font: 500 11.5px var(--mz-font-mono); color: var(--mz-stone); }
+      .msg p { margin-top: 2px; font: 500 16px/1.5 var(--mz-font-ui); }
+      .msg p[lang="ta"] { font-family: var(--mz-font-display); }
+      .msg small { display: block; margin-top: 2px; font-style: italic; font-size: 12.5px; color: var(--mz-stone); }
+      .msg.mine .bubble { padding: 8px 12px; border-radius: 10px; background: var(--mz-manjal-100); box-shadow: inset 0 0 0 1px var(--mz-manjal-700); }
+      .msg.out { animation: out .35s ease forwards; }
+      @keyframes in { from { opacity: 0; transform: translateY(10px); } }
+      @keyframes out { to { opacity: 0; transform: translateY(-6px); } }
+      .composer { margin: 8px 22px 18px; padding: 12px 14px; min-height: 48px; border: 1.5px solid var(--mz-line); border-radius: 10px; font: 500 16px/1.5 var(--mz-font-display); color: var(--mz-stone); transition: background .25s, border-color .25s; }
+      .composer.focus { border-color: var(--mz-karungal); }
+      .composer.filled { color: var(--mz-ink); background: var(--mz-manjal-100); border-color: var(--mz-manjal-700); }
+      .caret { display: inline-block; width: 2px; height: 1.1em; margin-left: 1px; vertical-align: -3px; background: var(--mz-ink); animation: blink 1s steps(1) infinite; }
+      @keyframes blink { 50% { opacity: 0; } }
+
+      .overlay { position: absolute; left: 340px; bottom: 0; width: 600px; height: 300px; border: 0; background: transparent; transition: opacity .35s ease, transform .45s var(--mz-ease-spring); }
+      .overlay.hidden { opacity: 0; transform: translateY(18px) scale(.97); }
+
+      .keys { position: absolute; right: 44px; top: 52px; display: flex; align-items: center; gap: 10px; opacity: 0; transform: translateY(-6px); transition: opacity .2s, transform .25s; }
+      .keys.show { opacity: 1; transform: none; }
+      .keys kbd {
+        display: grid; place-items: center; width: 54px; height: 50px; padding-top: 4px; font: 600 24px/1 -apple-system, var(--mz-font-mono);
+        color: var(--mz-ink); background: var(--mz-paper); border: 2px solid var(--mz-ink); border-radius: 11px; box-shadow: 0 5px 0 var(--mz-ink); transition: transform 70ms, box-shadow 70ms, background 70ms;
+      }
+      .keys kbd.down { transform: translateY(4px); box-shadow: 0 1px 0 var(--mz-ink); background: var(--mz-manjal); }
+      .keys span { padding: 6px 9px; border-radius: 7px; font: 700 11px/1 var(--mz-font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mz-paper); background: var(--mz-mai); }
+    </style>
+  </head>
+  <body>
+    <img class="kolam" src="../../../apps/web/public/art/kolam-hero.svg" alt="" />
+    <img class="vimana" src="../../../apps/web/public/art/vimana-arakku.svg" alt="" />
+
+    <div class="menubar">
+      <b>Slack</b><span>File</span><span>Edit</span><span>View</span><span>Window</span>
+      <div class="right"><span class="tray" id="tray"><img src="../../../apps/web/public/art/aytham-manjal.svg" alt="" /></span><span>வியா 29 அக் · 10:10</span></div>
+    </div>
+
+    <div class="window">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span>Slack · #general</div>
+      <div class="body">
+        <div class="side">
+          <h4>Mozhi team</h4>
+          <span class="on"># general</span><span># design</span><span># tamil-nlp</span><span># releases</span><span>@ Priya</span><span>@ Arun</span>
+        </div>
+        <div class="main">
+          <div class="thread" id="thread">
+            <div class="msg"><span class="av" style="background:#0e5e5a">A</span><div><b>Arun</b><time>9:58</time><p>Standup in 15. Agenda is in the doc.</p></div></div>
+            <div class="msg"><span class="av" style="background:#8f0f14">P</span><div><b>Priya</b><time>10:02</time><p lang="ta">எல்லாரும் வந்துடுவீங்களா?</p><small>Is everyone joining?</small></div></div>
+          </div>
+          <div class="composer focus" id="composer"><span id="composed">Message #general</span><span class="caret"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="keys" id="keys"><kbd>⌃</kbd><kbd>⌃</kbd><span>control × 2</span></div>
+
+    <iframe class="overlay hidden" id="overlay" src="/overlay.html" title="Mozhi overlay"></iframe>
+
+    <script type="module">
+      const $ = (id) => document.getElementById(id);
+      const frame = $("overlay");
+      const GLOSS = "Hi everyone, I'll be a little late for today's meeting. Be there in ten minutes.";
+      const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+      let starts = [];
+      window.nextStart = () => new Promise((r) => starts.push(r));
+
+      async function tap() {
+        $("keys").classList.add("show");
+        for (const k of $("keys").querySelectorAll("kbd")) {
+          k.classList.add("down");
+          await wait(110);
+          k.classList.remove("down");
+          await wait(40);
+        }
+        await wait(600);
+        $("keys").classList.remove("show");
+      }
+
+      function setComposer(text, filled) {
+        $("composed").textContent = text || "Message #general";
+        $("composer").classList.toggle("filled", !!filled);
+      }
+
+      let last = "";
+      async function onPhase(phase, doc) {
+        if (phase === "starting") {
+          starts.splice(0).forEach((r) => r());
+          frame.classList.remove("hidden");
+          $("tray").classList.add("on");
+          setComposer("", false);
+          wait(4650).then(tap); // the demo commits at 5.08 s: show the second double-tap just before
+        }
+        if (phase === "done") {
+          const text = doc.querySelector(".transcript")?.textContent ?? "";
+          setComposer(text, true);
+          await wait(1050);
+          setComposer("", false);
+          const m = document.createElement("div");
+          m.className = "msg mine";
+          m.innerHTML = `<span class="av" style="background:#c4960f">K</span><div><b>Kamal</b><time>10:10</time><div class="bubble"><p lang="ta"></p><small></small></div></div>`;
+          m.querySelector("p").textContent = text;
+          m.querySelector("small").textContent = GLOSS;
+          $("thread").append(m);
+          await wait(450);
+          frame.classList.add("hidden");
+          $("tray").classList.remove("on");
+          await wait(300);
+          tap(); // the next dictation starts 2.6 s after done
+          await wait(350);
+          m.classList.add("out"); // gone before the loop restarts, so the GIF loops cleanly
+          await wait(400);
+          m.remove();
+        }
+      }
+
+      frame.addEventListener("load", () => {
+        const doc = frame.contentDocument;
+        setInterval(() => {
+          const phase = doc.querySelector(".card")?.dataset.phase ?? "";
+          if (phase !== last) {
+            last = phase;
+            onPhase(phase, doc);
+          }
+        }, 30);
+      });
+    </script>
+  </body>
+</html>

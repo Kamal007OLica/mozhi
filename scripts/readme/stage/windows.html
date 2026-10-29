@@ -1,0 +1,37 @@
+<!doctype html>
+<!-- README "inside the app" plate: real app screenshots (app-*.raw.png) in macOS-style windows. -->
+<html lang="ta">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../brand/fonts/fonts.css" />
+    <link rel="stylesheet" href="../../../brand/tokens.css" />
+    <style>
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1280px; height: 760px; overflow: hidden; background: transparent; }
+      .plate { position: absolute; inset: 0; isolation: isolate; overflow: hidden; border-radius: 28px; background: var(--mz-paper); }
+      .plate::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(circle, rgb(23 17 14 / .14) 1.2px, transparent 1.7px) 0 0 / 18px 18px; }
+      .kolam { position: absolute; z-index: -1; right: -90px; bottom: -110px; width: 520px; opacity: .18; }
+      .win { position: absolute; width: 1080px; border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 40px 80px -30px rgb(23 17 14 / .55), 0 0 0 1px rgb(23 17 14 / .22); transform-origin: top left; }
+      .win img { display: block; width: 1080px; height: 720px; }
+      .win .lights { position: absolute; left: 16px; top: 16px; display: flex; gap: 8px; }
+      .win .lights i { width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; }
+      .win .lights i:nth-child(2) { background: #febc2e; } .win .lights i:nth-child(3) { background: #28c840; }
+      .w1 { left: 60px; top: 46px; transform: scale(.52) rotate(-2deg); }
+      .w2 { left: 690px; top: 70px; transform: scale(.52) rotate(2deg); }
+      .w3 { left: 250px; top: 196px; transform: scale(.72); }
+      .tag { position: absolute; font: 700 13px/1 var(--mz-font-mono); letter-spacing: .14em; text-transform: uppercase; padding: 7px 11px; border-radius: 999px; color: var(--mz-paper); background: var(--mz-mai); }
+      .tag b { font: 800 15px/1 var(--mz-font-display); color: var(--mz-manjal); margin-right: 6px; letter-spacing: 0; }
+    </style>
+  </head>
+  <body>
+    <div class="plate" id="plate">
+      <img class="kolam" src="../../../apps/web/public/art/kolam-kumkum.svg" alt="" />
+      <div class="win w1"><img src="../../../.github/readme/app-models.raw.png" alt="" /><span class="lights"><i></i><i></i><i></i></span></div>
+      <div class="win w2"><img src="../../../.github/readme/app-history.raw.png" alt="" /><span class="lights"><i></i><i></i><i></i></span></div>
+      <div class="win w3"><img src="../../../.github/readme/app-home.raw.png" alt="" /><span class="lights"><i></i><i></i><i></i></span></div>
+      <span class="tag" style="left: 70px; top: 22px"><b>மாதிரிகள்</b>Models</span>
+      <span class="tag" style="right: 70px; top: 22px"><b>வரலாறு</b>History</span>
+      <span class="tag" style="left: 268px; bottom: 26px"><b>முகப்பு</b>Home</span>
+    </div>
+  </body>
+</html>

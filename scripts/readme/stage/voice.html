@@ -1,0 +1,78 @@
+<!doctype html>
+<!-- README close-up of the voice indicator (apps/desktop/src/shared/voice.ts), cycling its states. -->
+<html lang="ta">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../brand/fonts/fonts.css" />
+    <link rel="stylesheet" href="../../../brand/tokens.css" />
+    <style>
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 960px; height: 360px; overflow: hidden; }
+      body {
+        position: relative; isolation: isolate; display: grid; place-items: center; align-content: center; gap: 26px;
+        color: var(--mz-paper); font-family: var(--mz-font-ui);
+        background: radial-gradient(60% 80% at 50% 38%, #3a1712 0%, var(--mz-mai) 70%);
+      }
+      body::after { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--mz-grain); opacity: .35; mix-blend-mode: screen; }
+      .halo { position: absolute; z-index: -1; left: 50%; top: 38%; width: 340px; height: 340px; margin: -170px 0 0 -170px; border-radius: 50%;
+        background: radial-gradient(circle, rgb(244 196 48 / calc(.10 + var(--lvl, 0) * .35)), transparent 65%); transition: background .2s; }
+      body[data-state="done"] .halo { background: radial-gradient(circle, rgb(111 220 154 / .22), transparent 65%); }
+      .viz { transform: scale(2.1); margin: 26px 0 18px; }
+      .label { display: grid; justify-items: center; gap: 4px; min-height: 64px; }
+      .label b { font: 800 30px/1.2 var(--mz-font-display); font-stretch: 80%; color: var(--mz-manjal); }
+      body[data-state="done"] .label b { color: #8fe8b0; }
+      .label span { font: 600 13px/1 var(--mz-font-mono); letter-spacing: .18em; text-transform: uppercase; color: var(--mz-chandanam); }
+      .chips { display: flex; gap: 8px; }
+      .chips i { font: 600 11px/1 var(--mz-font-mono); font-style: normal; letter-spacing: .1em; text-transform: uppercase; padding: 6px 10px; border-radius: 999px;
+        color: var(--mz-stone); border: 1px solid rgb(247 240 227 / .14); transition: all .25s; }
+      .chips i.on { color: var(--mz-ink); background: var(--mz-manjal); border-color: var(--mz-manjal); }
+      body[data-state="done"] .chips i.on { background: #8fe8b0; border-color: #8fe8b0; }
+    </style>
+  </head>
+  <body data-state="idle">
+    <i class="halo"></i>
+    <div class="viz" id="viz"></div>
+    <div class="label"><b id="ta"></b><span id="en"></span></div>
+    <div class="chips" id="chips"><i data-s="idle">ஃ idle</i><i data-s="listening">listening</i><i data-s="transcribing">writing</i><i data-s="done">inserted</i></div>
+    <script type="module">
+      import { Voice } from "/src/shared/voice.ts";
+      const voice = new Voice({ height: 30, onLevel: (l) => document.body.style.setProperty("--lvl", l.toFixed(3)) });
+      document.getElementById("viz").append(voice.el);
+      const LABEL = {
+        idle: ["தயார்", "ready · double-tap ⌃⌃"],
+        listening: ["கேட்கிறேன்…", "listening to your voice"],
+        transcribing: ["எழுதுகிறேன்…", "writing it down"],
+        done: ["சேர்த்தாச்சு ✓", "inserted into your app"],
+      };
+      const PLAN = [["idle", 1500], ["listening", 3600], ["transcribing", 2100], ["done", 1700]];
+      let state = "idle";
+      const starts = [];
+      window.nextStart = () => new Promise((r) => starts.push(r));
+      function set(s) {
+        state = s;
+        voice.setState(s);
+        document.body.dataset.state = s;
+        document.getElementById("ta").textContent = LABEL[s][0];
+        document.getElementById("en").textContent = LABEL[s][1];
+        document.querySelectorAll("#chips i").forEach((i) => i.classList.toggle("on", i.dataset.s === s));
+      }
+      // Speech-like level: syllables at ~5 Hz inside words, short gaps between words.
+      const speak = (now) => {
+        const t = now / 1000;
+        const word = Math.sin(t * 2.4) > -0.35;
+        voice.setLevel(state === "listening" && word ? 0.35 + 0.6 * Math.abs(Math.sin(t * 15.7)) * (0.55 + 0.45 * Math.sin(t * 3.3)) : 0.02);
+        requestAnimationFrame(speak);
+      };
+      requestAnimationFrame(speak);
+      (async () => {
+        for (;;) {
+          for (const [s, ms] of PLAN) {
+            if (s === "idle") starts.splice(0).forEach((r) => r());
+            set(s);
+            await new Promise((r) => setTimeout(r, ms));
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>

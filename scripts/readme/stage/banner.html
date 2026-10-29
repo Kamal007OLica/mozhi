@@ -1,0 +1,54 @@
+<!doctype html>
+<!-- README banner (1280×560). Rendered by scripts/readme/record.mjs. -->
+<html lang="ta">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../brand/fonts/fonts.css" />
+    <link rel="stylesheet" href="../../../brand/tokens.css" />
+    <style>
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1280px; height: 560px; overflow: hidden; background: transparent; }
+      .plate {
+        position: absolute; inset: 0; isolation: isolate; overflow: hidden; border-radius: 28px;
+        color: var(--mz-paper); font-family: var(--mz-font-ui);
+        background: radial-gradient(110% 120% at 20% 0%, #d01b21 0%, var(--mz-kumkum) 50%, #93101a 100%);
+      }
+      .plate::after { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--mz-grain); mix-blend-mode: multiply; opacity: .55; }
+      .kolam { position: absolute; z-index: -1; left: -110px; top: -150px; width: 560px; opacity: .14; }
+      .vimana { position: absolute; z-index: -1; right: 58px; bottom: 40px; height: 540px; image-rendering: pixelated; }
+      .band { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: var(--mz-arakku) url(../../../apps/web/public/art/band-kodi.svg) 0 50% / 96px 40px repeat-x; }
+      .copy { position: absolute; left: 76px; top: 58px; }
+      .eyebrow { display: flex; align-items: center; gap: 14px; font: 600 14px/1 var(--mz-font-mono); letter-spacing: .2em; color: var(--mz-manjal-300); }
+      .eyebrow img { width: 42px; height: 42px; border-radius: 11px; box-shadow: 3px 3px 0 var(--mz-mai); }
+      h1 { margin-top: 10px; font: 800 200px/1.02 var(--mz-font-display); font-stretch: 75%; text-shadow: 9px 9px 0 var(--mz-arakku); }
+      h1 em { font-style: normal; color: var(--mz-manjal); }
+      .tag { font: 800 56px/1.2 var(--mz-font-display); font-stretch: 75%; color: var(--mz-manjal); }
+      .en { margin-top: 6px; font: 600 27px/1.3 var(--mz-font-ui); }
+      .chips { display: flex; gap: 10px; margin-top: 18px; }
+      .chips span { padding: 7px 13px; border-radius: 999px; font: 600 14px/1 var(--mz-font-mono); color: var(--mz-paper); background: rgb(23 17 14 / .28); box-shadow: inset 0 0 0 1px rgb(247 240 227 / .28); }
+      .chips span b { font: 800 15px/1 var(--mz-font-display); color: var(--mz-manjal); }
+      .stamp {
+        position: absolute; right: 300px; top: 52px; width: 140px; height: 140px; display: grid; place-content: center; text-align: center;
+        border-radius: 50%; background: var(--mz-manjal); color: var(--mz-ink); transform: rotate(12deg);
+        outline: 2px dashed var(--mz-ink); outline-offset: -9px; box-shadow: 4px 4px 0 var(--mz-mai);
+        font: 800 15px/1.2 var(--mz-font-display);
+      }
+      .stamp small { display: block; margin-top: 4px; font: 700 9px/1.3 var(--mz-font-mono); letter-spacing: .08em; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <div class="plate" id="plate">
+      <img class="kolam" src="../../../apps/web/public/art/kolam-hero.svg" alt="" />
+      <img class="vimana" src="../../../apps/web/public/art/vimana-arakku.svg" alt="" />
+      <div class="copy">
+        <p class="eyebrow"><img src="../../../apps/web/public/art/mark.svg" alt="" /> OPEN SOURCE · ON-DEVICE · FREE</p>
+        <h1>மொ<em>ழி</em></h1>
+        <p class="tag">பேசுங்க. எழுத்தாகும்.</p>
+        <p class="en">Speak Tamil. It types, in any app, on your own computer.</p>
+        <p class="chips"><span><b>தமிழ்</b> · Tanglish · English</span><span>macOS · Windows</span><span>100% offline</span></p>
+      </div>
+      <div class="stamp">அன்னைத்<br />தமிழுக்கு<small>for Mother Tamil</small></div>
+      <div class="band"></div>
+    </div>
+  </body>
+</html>
