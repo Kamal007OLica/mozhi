@@ -656,10 +656,48 @@ pub fn show_overlay(window: &tauri::WebviewWindow, position: Option<(f64, f64)>)
     Ok(())
 }
 
+/// Lets the overlay take keyboard focus for editing: drop WS_EX_NOACTIVATE and bring it to
+/// the foreground (Windows has no non-activating key window; `insert_text` brings the
+/// target back before pasting).
+pub fn focus_overlay(window: &tauri::WebviewWindow) -> anyhow::Result<()> {
+    let h = Hwnd::of(window)?;
+    window.run_on_main_thread(move || unsafe {
+        let hwnd = h.get();
+        let ex = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+        SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex & !(WS_EX_NOACTIVATE.0 as isize));
+        let fg_thread = GetWindowThreadProcessId(GetForegroundWindow(), None);
+        let me = GetCurrentThreadId();
+        let attached = fg_thread != 0 && fg_thread != me && AttachThreadInput(me, fg_thread, true).as_bool();
+        let _ = BringWindowToTop(hwnd);
+        let _ = SetForegroundWindow(hwnd);
+        if attached {
+            let _ = AttachThreadInput(me, fg_thread, false);
+        }
+    })?;
+    Ok(())
+}
+
+pub fn unfocus_overlay(window: &tauri::WebviewWindow, target: Option<&FrontApp>) -> anyhow::Result<()> {
+    let h = Hwnd::of(window)?;
+    window.run_on_main_thread(move || unsafe {
+        let hwnd = h.get();
+        let ex = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+        SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex | WS_EX_NOACTIVATE.0 as isize);
+    })?;
+    if let Some(t) = target {
+        bring_to_front(t)?;
+    }
+    Ok(())
+}
+
 pub fn hide_overlay(window: &tauri::WebviewWindow) -> anyhow::Result<()> {
     let h = Hwnd::of(window)?;
     window.run_on_main_thread(move || unsafe {
-        let _ = ShowWindow(h.get(), SW_HIDE);
+        let hwnd = h.get();
+        let _ = ShowWindow(hwnd, SW_HIDE);
+        // Undo focus_overlay, in case editing ended by cancel rather than insert.
+        let ex = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+        SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex | WS_EX_NOACTIVATE.0 as isize);
     })?;
     Ok(())
 }

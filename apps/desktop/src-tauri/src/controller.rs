@@ -1,8 +1,13 @@
 //! The dictation state machine.
 //!
 //!   Idle ──⌃⌃──▶ Starting ──▶ Listening ──⌃⌃ / ↵──▶ Transcribing ──▶ Inserting ──▶ Done ──▶ Idle
-//!                   │             │                     │
-//!                   └──── esc ────┴──────── esc ────────┴──▶ Idle (audio discarded)
+//!                   │             │  │                  │  │                ▲
+//!                   │             │  └─ click text ─────┘  └─▶ Editing ──↵ / ⌃⌃─┘
+//!                   └──── esc ────┴──────── esc ────────────────────┴──▶ Idle (discarded)
+//!
+//! While Editing, the overlay holds keyboard focus (without activating Mozhi on macOS) and
+//! the user fixes the transcript in place; ↵ hands focus back to their app and pastes.
+//! The clipboard button saves the transcript to History (copied, not pasted) and opens it.
 //!
 //! Every transition is emitted to the overlay as `mozhi:state`. A session counter makes
 //! late results from a cancelled session harmless.
@@ -39,6 +44,21 @@ struct Inner {
     target: Option<FrontApp>,
     element: Option<FocusedElement>,
     mode: OutputMode,
+    /// The transcript as currently edited in the overlay.
+    draft: String,
+    /// Engine result behind the draft, for the history entry.
+    pending: Option<TranscriptResult>,
+}
+
+/// What happens once the final transcript is ready.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum After {
+    /// Paste into the app the user is in.
+    Insert,
+    /// Show it editable in the overlay.
+    Edit,
+    /// Save to History (and the clipboard) and open History.
+    Keep,
 }
 
 pub struct Controller {
@@ -88,7 +108,7 @@ impl Controller {
             settings,
             history,
             session: AtomicU64::new(0),
-            inner: Mutex::new(Inner { phase: Phase::Idle, target: None, element: None, mode: s.output_mode }),
+            inner: Mutex::new(Inner { phase: Phase::Idle, target: None, element: None, mode: s.output_mode, draft: String::new(), pending: None }),
         })
     }
 
@@ -108,13 +128,19 @@ impl Controller {
         )
     }
 
+    /// The chosen model; with no explicit choice, the default — or, if that isn't downloaded,
+    /// whichever model is (so changing the default never strands existing users).
     pub fn model_id(&self) -> String {
         let id = self.settings.get().model_id;
-        if id.is_empty() {
-            engine::models::default_model_id().to_string()
-        } else {
-            id
+        if !id.is_empty() {
+            return id;
         }
+        let default = engine::models::default_model_id();
+        let catalog = engine::models::catalog(&self.engine.models_dir());
+        if catalog.iter().any(|m| m.id == default && m.installed) {
+            return default.to_string();
+        }
+        catalog.into_iter().find(|m| m.installed).map(|m| m.id).unwrap_or_else(|| default.to_string())
     }
 
     fn set_phase(&self, phase: Phase, message: Option<String>) {
@@ -137,8 +163,12 @@ impl Controller {
         match (ev, phase) {
             (KeyEvent::DoubleTap, Phase::Idle | Phase::Done | Phase::Error) => self.start(),
             (KeyEvent::DoubleTap, Phase::Starting | Phase::Listening) => self.commit(),
+            (KeyEvent::DoubleTap, Phase::Editing) => {
+                let draft = self.inner.lock().draft.clone();
+                self.insert_edited(draft);
+            }
             (KeyEvent::Enter, Phase::Starting | Phase::Listening) if self.settings.get().commit_on_enter => self.commit(),
-            (KeyEvent::Escape, Phase::Starting | Phase::Listening | Phase::Transcribing) => self.cancel(),
+            (KeyEvent::Escape, Phase::Starting | Phase::Listening | Phase::Transcribing | Phase::Editing) => self.cancel(),
             (KeyEvent::Escape, Phase::Done | Phase::Error) => self.dismiss(),
             _ => {}
         }
@@ -200,7 +230,18 @@ impl Controller {
         }
     }
 
+    /// ⌃⌃ / ↵ / Insert while listening: transcribe and paste (or review, if the user asked to).
     pub fn commit(self: &Arc<Self>) {
+        let after = if self.settings.get().review_before_insert { After::Edit } else { After::Insert };
+        self.finish_with(after);
+    }
+
+    /// The user clicked into the transcript: stop listening and let them edit it.
+    pub fn edit(self: &Arc<Self>) {
+        self.finish_with(After::Edit);
+    }
+
+    fn finish_with(self: &Arc<Self>, after: After) {
         if !matches!(self.phase(), Phase::Starting | Phase::Listening) {
             return;
         }
@@ -209,11 +250,71 @@ impl Controller {
         let me = self.clone();
         thread::Builder::new()
             .name("mozhi-commit".into())
-            .spawn(move || me.finish_session(session))
+            .spawn(move || me.finish_session(session, after))
             .ok();
     }
 
-    fn finish_session(self: Arc<Self>, session: u64) {
+    /// The overlay reports each edit so ⌃⌃ can insert the latest text.
+    pub fn update_draft(&self, text: String) {
+        let mut i = self.inner.lock();
+        if i.phase == Phase::Editing {
+            i.draft = text;
+        }
+    }
+
+    /// ↵ (or ⌃⌃) while editing: give focus back to the target app and paste the edited text.
+    pub fn insert_edited(self: &Arc<Self>, text: String) {
+        if self.phase() != Phase::Editing {
+            return;
+        }
+        let text = text.trim().to_string();
+        if text.is_empty() {
+            return self.cancel();
+        }
+        let session = self.session.load(Ordering::SeqCst);
+        self.set_phase(Phase::Inserting, None);
+        let me = self.clone();
+        thread::Builder::new()
+            .name("mozhi-insert".into())
+            .spawn(move || {
+                let (target, result) = {
+                    let mut i = me.inner.lock();
+                    (i.target.clone(), i.pending.take())
+                };
+                let pasteable = target.clone().filter(|t| !t.is_self);
+                if let Some(w) = me.overlay() {
+                    if let Err(e) = platform::unfocus_overlay(&w, pasteable.as_ref()) {
+                        log::warn!("unfocus overlay: {e:#}");
+                    }
+                }
+                if me.session.load(Ordering::SeqCst) == session {
+                    me.deliver(session, text, result, target);
+                }
+            })
+            .ok();
+    }
+
+    /// The clipboard button: keep what was said (in History and on the clipboard, never lost
+    /// mid-dictation) and open History in the main window.
+    pub fn open_history(self: &Arc<Self>) {
+        match self.phase() {
+            Phase::Starting | Phase::Listening => self.finish_with(After::Keep),
+            Phase::Editing => {
+                let session = self.session.load(Ordering::SeqCst);
+                let (draft, result) = {
+                    let mut i = self.inner.lock();
+                    (i.draft.clone(), i.pending.take())
+                };
+                self.keep(session, draft, result);
+            }
+            Phase::Done | Phase::Error => self.dismiss(),
+            _ => {}
+        }
+        crate::show_main_window(&self.app);
+        let _ = self.app.emit(EV_NAVIGATE, "history");
+    }
+
+    fn finish_session(self: Arc<Self>, session: u64, after: After) {
         let live = || self.session.load(Ordering::SeqCst) == session;
         let settings = self.settings.get();
         let mode = settings.output_mode;
@@ -262,8 +363,34 @@ impl Controller {
         let _ = self.app.emit(EV_FINAL, &text);
         self.capture.store(false, Ordering::SeqCst);
 
-        // Paste into the app the user is in *now* — they may have switched while speaking.
-        let target = self.current_target().or_else(|| self.inner.lock().target.clone());
+        match after {
+            After::Edit => {
+                {
+                    let mut i = self.inner.lock();
+                    i.draft = text;
+                    i.pending = Some(result);
+                }
+                self.set_phase(Phase::Editing, None);
+                if let Some(w) = self.overlay() {
+                    if let Err(e) = platform::focus_overlay(&w) {
+                        log::warn!("focus overlay: {e:#}");
+                    }
+                }
+            }
+            After::Keep => self.keep(session, text, Some(result)),
+            After::Insert => {
+                // Paste into the app the user is in *now*: they may have switched while speaking.
+                let target = self.current_target().or_else(|| self.inner.lock().target.clone());
+                self.deliver(session, text, Some(result), target);
+            }
+        }
+    }
+
+    /// Pastes `text` into `target` (or copies it when there's nowhere to paste), records it
+    /// in History and shows the outcome.
+    fn deliver(self: &Arc<Self>, session: u64, text: String, result: Option<TranscriptResult>, target: Option<FrontApp>) {
+        let settings = self.settings.get();
+        let mode = self.inner.lock().mode;
         let pasteable = settings.auto_paste && target.as_ref().map(|t| !t.is_self).unwrap_or(false);
 
         let (inserted, message) = if pasteable {
@@ -284,28 +411,44 @@ impl Controller {
             }
         };
 
-        if settings.history_enabled {
-            self.history.add(HistoryItem {
-                id: format!("{}-{}", now_ms(), session),
-                at: now_ms(),
-                text: text.clone(),
-                raw: result.raw.clone(),
-                language: result.language.clone(),
-                mode,
-                app_name: target.map(|t| t.name),
-                audio_ms: result.audio_ms,
-                inference_ms: result.inference_ms,
-                inserted,
-            });
-            let _ = self.app.emit(EV_HISTORY, ());
-        }
-
+        self.record(session, &text, result.as_ref(), mode, target.map(|t| t.name), inserted);
         self.set_phase(Phase::Done, Some(message));
         self.hide_later(session, LINGER_DONE);
     }
 
+    /// Saves the transcript to History and the clipboard without pasting, and closes the overlay.
+    fn keep(self: &Arc<Self>, session: u64, text: String, result: Option<TranscriptResult>) {
+        let text = text.trim().to_string();
+        if !text.is_empty() {
+            let _ = platform::copy_to_clipboard(&text);
+            let mode = self.inner.lock().mode;
+            self.record(session, &text, result.as_ref(), mode, None, false);
+        }
+        self.dismiss();
+    }
+
+    fn record(&self, session: u64, text: &str, result: Option<&TranscriptResult>, mode: OutputMode, app_name: Option<String>, inserted: bool) {
+        if !self.settings.get().history_enabled {
+            return;
+        }
+        self.history.add(HistoryItem {
+            id: format!("{}-{}", now_ms(), session),
+            at: now_ms(),
+            text: text.to_string(),
+            raw: result.map(|r| r.raw.clone()).unwrap_or_default(),
+            language: result.map(|r| r.language.clone()).unwrap_or_default(),
+            mode,
+            app_name,
+            audio_ms: result.map(|r| r.audio_ms).unwrap_or(0),
+            inference_ms: result.map(|r| r.inference_ms).unwrap_or(0),
+            inserted,
+        });
+        let _ = self.app.emit(EV_HISTORY, ());
+    }
+
     pub fn cancel(self: &Arc<Self>) {
         self.session.fetch_add(1, Ordering::SeqCst);
+        self.inner.lock().pending = None;
         self.engine.cancel();
         self.capture.store(false, Ordering::SeqCst);
         self.set_phase(Phase::Idle, None);
@@ -314,6 +457,7 @@ impl Controller {
 
     fn dismiss(self: &Arc<Self>) {
         self.session.fetch_add(1, Ordering::SeqCst);
+        self.inner.lock().pending = None;
         self.capture.store(false, Ordering::SeqCst);
         self.set_phase(Phase::Idle, None);
         self.hide_overlay();

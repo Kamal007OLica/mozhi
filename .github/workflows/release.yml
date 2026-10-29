@@ -101,6 +101,6 @@ jobs:
             2. SmartScreen may warn that the app is unrecognised: click **More info** → **Run anyway**. (It isn't code-signed yet.)
 
             ### First run
-            Mozhi downloads a speech model (about 550 MB for the recommended one) the first time. After that everything runs offline.
+            Mozhi downloads a speech model the first time (about 265 MB for the recommended Tamil model). After that everything runs offline.
 
             Found a problem? [Report it here](https://github.com/Kamal007OLica/mozhi/issues/new/choose).

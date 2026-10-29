@@ -121,6 +121,17 @@ pub fn hide_overlay(window: &tauri::WebviewWindow) -> anyhow::Result<()> {
     imp::hide_overlay(window)
 }
 
+/// Lets the overlay take keyboard focus so the transcript can be edited. On macOS Mozhi is
+/// still not activated: the panel becomes key while the user's app stays frontmost.
+pub fn focus_overlay(window: &tauri::WebviewWindow) -> anyhow::Result<()> {
+    imp::focus_overlay(window)
+}
+
+/// Gives keyboard focus back to `target` (blocking, < 150 ms) so a paste lands there.
+pub fn unfocus_overlay(window: &tauri::WebviewWindow, target: Option<&FrontApp>) -> anyhow::Result<()> {
+    imp::unfocus_overlay(window, target)
+}
+
 /// macOS: menu-bar app (no Dock icon) until the settings window opens. No-op elsewhere.
 pub fn set_dock_visible(app: &tauri::AppHandle, visible: bool) {
     imp::set_dock_visible(app, visible)

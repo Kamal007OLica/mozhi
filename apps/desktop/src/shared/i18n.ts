@@ -16,6 +16,10 @@ const S = {
   "ov.hintCancel": { ta: "ரத்து", en: "cancel" },
   "ov.placeholder": { ta: "பேசுங்கள்: தமிழ், Tanglish, English…", en: "Speak in Tamil, Tanglish or English…" },
   "ov.mode": { ta: "எழுத்து முறை", en: "Writing mode" },
+  "ov.editing": { ta: "திருத்தம்", en: "Editing" },
+  "ov.editHint": { ta: "திருத்த click செய்யுங்கள்", en: "Click to edit" },
+  "ov.hintNewline": { ta: "புது வரி", en: "new line" },
+  "ov.history": { ta: "வரலாறு: சொன்னவை அனைத்தும்", en: "History: everything you've dictated" },
 
   // nav
   "nav.home": { ta: "முகப்பு", en: "Home" },
@@ -102,6 +106,7 @@ const S = {
   },
   "shortcut.speed": { ta: "இரு தட்டுகளுக்கு இடைவெளி", en: "Gap between taps" },
   "shortcut.enter": { ta: "Enter அழுத்தினாலும் இடு", en: "Enter also inserts" },
+  "shortcut.review": { ta: "இடுவதற்கு முன் திருத்த நிறுத்து", en: "Pause to edit before inserting" },
   "shortcut.position": { ta: "Overlay இடம்", en: "Overlay position" },
   "shortcut.resetPos": { ta: "கீழ் நடுவுக்கு மீட்டமை", en: "Reset to bottom centre" },
 
@@ -110,6 +115,8 @@ const S = {
   "history.empty": { ta: "இன்னும் எதுவும் இல்லை. Control-ஐ இருமுறை தட்டிப் பேசுங்கள்.", en: "Nothing yet. Double-tap Control and speak." },
   "history.search": { ta: "தேடு…", en: "Search…" },
   "history.copy": { ta: "நகலெடு", en: "Copy" },
+  "history.copyAll": { ta: "அனைத்தையும் நகலெடு", en: "Copy all" },
+  "history.copiedAll": { ta: "அனைத்தும் clipboard-இல்", en: "Everything copied to the clipboard" },
   "history.copied": { ta: "நகலெடுக்கப்பட்டது", en: "Copied" },
   "history.clear": { ta: "அனைத்தையும் அழி", en: "Clear all" },
   "history.confirmClear": { ta: "உறுதியாக? மீண்டும் அழுத்துங்கள்", en: "Sure? Click again" },

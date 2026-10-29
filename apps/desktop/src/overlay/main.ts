@@ -1,5 +1,7 @@
-// The floating dictation overlay. It never takes focus: the user's app keeps the caret,
-// and the Rust key hook delivers ⌃⌃ / ↵ / esc. Buttons here still work (non-activating panel).
+// The floating dictation overlay. While listening it never takes focus: the user's app keeps
+// the caret, and the Rust key hook delivers ⌃⌃ / ↵ / esc. Buttons still work (non-activating
+// panel). Clicking the transcript switches to editing: the panel takes keyboard focus (on
+// macOS without activating Mozhi), ↵ inserts the edited text into the user's app.
 import "../shared/base.css";
 import "./overlay.css";
 
@@ -26,12 +28,20 @@ const appName = h("strong", { class: "target-app" });
 const fieldName = h("span", { class: "target-field" });
 const targetEl = h("div", { class: "target", "data-tauri-drag-region": true, title: "" }, appIcon, h("div", { class: "target-text", "data-tauri-drag-region": true }, h("span", { class: "eyebrow", "data-tauri-drag-region": true }), h("div", { class: "target-line", "data-tauri-drag-region": true }, appName, fieldName)));
 const modeBtn = h("button", { class: "mode", type: "button", onclick: cycleMode });
-const textEl = h("div", { class: "transcript", "aria-live": "polite" });
+const LINES = 3;
+const textEl = h("textarea", { class: "transcript", rows: 1, readonly: true, spellcheck: "false", autocomplete: "off", "aria-live": "polite" }) as HTMLTextAreaElement;
 const statusEl = h("span", { class: "status" });
 const timerEl = h("span", { class: "timer mono" });
 const hintEl = h("span", { class: "hints" });
 const cancelBtn = h("button", { class: "icon-btn", type: "button", "aria-label": "", onclick: () => api.cancelDictation() }, "✕");
-const insertBtn = h("button", { class: "insert", type: "button", onclick: () => api.commitDictation() });
+const historyBtn = h("button", {
+  class: "icon-btn history-btn",
+  type: "button",
+  "aria-label": "",
+  onclick: () => api.openHistory(),
+  html: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4.5V3.6c0-.6.4-1 1-1h4c.6 0 1 .4 1 1v.9M9 10h6M9 14h6M9 18h3.5"/></svg>`,
+});
+const insertBtn = h("button", { class: "insert", type: "button", onclick: insertNow });
 
 const card = h(
   "section",
@@ -40,7 +50,7 @@ const card = h(
   h("i", { class: "shine", "aria-hidden": "true" }),
   h("header", { class: "head", "data-tauri-drag-region": true }, targetEl, modeBtn),
   textEl,
-  h("footer", { class: "foot" }, h("div", { class: "well" }, voice.el), h("div", { class: "state" }, statusEl, timerEl), h("div", { class: "actions" }, hintEl, cancelBtn, insertBtn)),
+  h("footer", { class: "foot" }, h("div", { class: "well" }, voice.el), h("div", { class: "state" }, statusEl, timerEl), h("div", { class: "actions" }, hintEl, historyBtn, cancelBtn, insertBtn)),
 );
 stage.append(h("i", { class: "aura", "aria-hidden": "true" }), card);
 document.getElementById("overlay")!.append(stage);
@@ -52,16 +62,30 @@ function applyLang() {
   (targetEl.querySelector(".eyebrow") as HTMLElement).textContent = t("ov.into");
   cancelBtn.setAttribute("aria-label", t("ov.cancel"));
   cancelBtn.title = `${t("ov.cancel")} (esc)`;
+  historyBtn.setAttribute("aria-label", t("ov.history"));
+  historyBtn.title = t("ov.history");
+  textEl.placeholder = t("ov.placeholder");
   insertBtn.textContent = t("ov.insert");
   modeBtn.title = t("ov.mode");
+  renderHints();
+  renderMode();
+  renderText();
+}
+
+function renderHints() {
   const key = triggerGlyph(settings?.hotkey.key ?? "control");
   hintEl.innerHTML = "";
+  if (phase === "editing") {
+    hintEl.append(
+      h("span", { class: "hint" }, h("kbd", null, "↵"), t("ov.hintInsert")),
+      h("span", { class: "hint" }, h("kbd", null, "⇧↵"), t("ov.hintNewline")),
+    );
+    return;
+  }
   hintEl.append(
     h("span", { class: "hint" }, h("kbd", null, `${key}${key}`), settings?.commitOnEnter !== false ? h("kbd", null, "↵") : "", t("ov.hintInsert")),
     h("span", { class: "hint" }, h("kbd", null, "esc"), t("ov.hintCancel")),
   );
-  renderMode();
-  renderText();
 }
 
 function renderMode() {
@@ -92,11 +116,52 @@ function renderTarget(p: TargetPayload) {
   targetEl.title = [app.name, app.windowTitle, p.element?.label].filter(Boolean).join(" · ");
 }
 
+/** At most three lines tall. While listening the newest words stay in view and older ones
+ *  fade out at the top; while editing the box scrolls with the caret. */
+function fitText() {
+  const cs = getComputedStyle(textEl);
+  const line = parseFloat(cs.lineHeight) || 28;
+  const pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+  textEl.style.height = "auto";
+  const full = textEl.scrollHeight;
+  const max = line * LINES + pad;
+  textEl.style.height = `${Math.min(full, max)}px`;
+  markClipped();
+}
+
+/** Fade the top edge only while there is text hidden above it. */
+function markClipped() {
+  textEl.classList.toggle("clipped", textEl.scrollTop > 2);
+}
+
 function renderText() {
+  // Never overwrite what the user is typing.
+  if (phase === "editing" && document.activeElement === textEl) return;
   textEl.classList.toggle("empty", !text);
-  textEl.textContent = text || t("ov.placeholder");
+  textEl.value = text;
   textEl.lang = /[஀-௿]/.test(text) ? "ta" : "en";
+  fitText();
   textEl.scrollTop = textEl.scrollHeight;
+  markClipped();
+}
+
+function insertNow() {
+  if (phase === "editing") api.insertDraft(textEl.value);
+  else api.commitDictation();
+}
+
+function beginEditing() {
+  textEl.readOnly = false;
+  // The native panel becomes key a moment after the phase change; focus once it has.
+  const focus = () => {
+    textEl.focus({ preventScroll: true });
+    const end = textEl.value.length;
+    textEl.setSelectionRange(end, end);
+    textEl.scrollTop = textEl.scrollHeight;
+  };
+  focus();
+  setTimeout(focus, 60);
+  setTimeout(focus, 200);
 }
 
 function renderPhase(next: Phase, message?: string | null) {
@@ -108,6 +173,7 @@ function renderPhase(next: Phase, message?: string | null) {
     starting: "idle",
     listening: "listening",
     transcribing: "transcribing",
+    editing: "idle",
     inserting: "transcribing",
     done: "done",
     error: "error",
@@ -125,8 +191,18 @@ function renderPhase(next: Phase, message?: string | null) {
   if (next === "done" && message) statusEl.textContent = `✓ ${message}`;
 
   const live = next === "starting" || next === "listening";
-  insertBtn.disabled = !live;
-  cancelBtn.disabled = !(live || next === "transcribing");
+  const editing = next === "editing";
+  insertBtn.disabled = !(live || editing);
+  cancelBtn.disabled = !(live || editing || next === "transcribing");
+  historyBtn.disabled = next === "idle" || next === "transcribing" || next === "inserting";
+  textEl.title = live ? t("ov.editHint") : "";
+  if (editing) beginEditing();
+  else {
+    textEl.readOnly = true;
+    if (document.activeElement === textEl) textEl.blur();
+  }
+  renderHints();
+  if (editing) statusEl.textContent = t("ov.editing");
   if (next === "starting") {
     // replay the entrance each time the pill appears
     card.classList.remove("enter");
@@ -142,6 +218,42 @@ function renderPhase(next: Phase, message?: string | null) {
 }
 
 // ── behaviour ────────────────────────────────────────────────────────────────
+
+// Click into the live transcript → stop listening and edit it.
+textEl.addEventListener("mousedown", (e) => {
+  if (phase === "starting" || phase === "listening") {
+    e.preventDefault();
+    api.editDictation();
+  }
+});
+
+textEl.addEventListener("scroll", markClipped, { passive: true });
+// Tamil glyphs are taller than the fallback font: measure again once the web fonts are in.
+document.fonts?.ready.then(() => {
+  fitText();
+  if (phase !== "editing") textEl.scrollTop = textEl.scrollHeight;
+  markClipped();
+});
+
+let draftTimer = 0;
+textEl.addEventListener("input", () => {
+  text = textEl.value;
+  textEl.classList.toggle("empty", !text);
+  fitText();
+  clearTimeout(draftTimer);
+  draftTimer = window.setTimeout(() => api.updateDraft(textEl.value).catch(() => {}), 40);
+});
+
+textEl.addEventListener("keydown", (e) => {
+  if (phase !== "editing" || e.isComposing || e.keyCode === 229) return; // let Tamil IMEs finish their composition
+  if (e.key === "Enter" && !e.shiftKey && !e.altKey) {
+    e.preventDefault();
+    api.insertDraft(textEl.value);
+  } else if (e.key === "Escape") {
+    e.preventDefault();
+    api.cancelDictation();
+  }
+});
 
 function cycleMode() {
   mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
@@ -234,7 +346,16 @@ function demo() {
   settings = { uiLanguage: "ta", sounds: false, commitOnEnter: true, hotkey: { key: "control", doubleTapMs: 380, maxTapMs: 260 } } as Settings;
   applyLang();
   renderTarget({ app: { name: "Slack", id: "com.tinyspeck.slackmacgap", pid: 1, windowTitle: "#general", icon: null, isSelf: false }, element: { role: "textArea", label: "Message #general", editable: true } });
-  const words = "வணக்கம் எல்லாருக்கும், இன்னைக்கு meeting-க்கு கொஞ்சம் late ஆகும். பத்து நிமிஷத்துல வந்துடுறேன்.".split(" ");
+  const words = "வணக்கம் எல்லாருக்கும், இன்னைக்கு meeting-க்கு கொஞ்சம் late ஆகும். பத்து நிமிஷத்துல வந்துடுறேன். அதுக்குள்ள agenda-வ ஒரு தடவை பாத்துருங்க, அப்புறம் client call-ல என்ன பேசணும்னு முடிவு பண்ணலாம்.".split(" ");
+  // `?phase=editing` (or any phase) freezes the preview in that state for screenshots.
+  const frozen = new URLSearchParams(location.search).get("phase") as Phase | null;
+  if (frozen) {
+    text = words.join(" ");
+    renderPhase(frozen === "editing" ? "listening" : frozen, frozen === "done" ? "Inserted into Slack" : null);
+    renderText();
+    if (frozen === "editing") renderPhase("editing");
+    return;
+  }
   const run = () => {
     renderPhase("starting");
     setTimeout(() => renderPhase("listening"), 400);
@@ -246,8 +367,9 @@ function demo() {
     );
     const end = 900 + words.length * 420 + 400;
     setTimeout(() => renderPhase("transcribing"), end);
-    setTimeout(() => renderPhase("done", "Inserted into Slack"), end + 1600);
-    setTimeout(run, end + 4200);
+    setTimeout(() => renderPhase("editing"), end + 1200);
+    setTimeout(() => renderPhase("done", "Inserted into Slack"), end + 7000);
+    setTimeout(run, end + 9600);
   };
   let t0 = 0;
   const wobble = (now: number) => {

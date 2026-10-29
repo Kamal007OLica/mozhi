@@ -76,6 +76,8 @@ pub struct Settings {
     pub hotkey: HotkeyConfig,
     /// Enter (while the overlay is listening) inserts, like a second double-tap.
     pub commit_on_enter: bool,
+    /// Stop in the overlay with the transcript editable instead of pasting right away.
+    pub review_before_insert: bool,
     /// Paste into the target app. When false Mozhi only copies to the clipboard.
     pub auto_paste: bool,
     /// Put the user's previous clipboard back after pasting.
@@ -102,6 +104,7 @@ impl Default for Settings {
             model_id: String::new(), // empty → engine::models::default_model_id()
             hotkey: HotkeyConfig::default(),
             commit_on_enter: true,
+            review_before_insert: false,
             auto_paste: true,
             restore_clipboard: true,
             live_preview: true,
@@ -220,6 +223,8 @@ pub enum Phase {
     Listening,
     /// Final transcription + polish.
     Transcribing,
+    /// The final transcript is in the overlay for the user to edit; ↵ inserts it.
+    Editing,
     Inserting,
     /// Inserted (or copied) — overlay lingers briefly then hides.
     Done,

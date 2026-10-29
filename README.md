@@ -98,10 +98,12 @@ Permissions and About. Everything you dictate stays in a local history you can s
 
 <p align="center"><img src=".github/readme/plate-stamps.png" width="100%" alt="Speech models as postage stamps, each with speed and Tamil accuracy ratings. Large v3 Turbo Q5 is recommended."></p>
 
-Mozhi downloads a model on first run from Hugging Face and verifies it by SHA-256. The default,
-**Whisper large-v3-turbo (Q5, about 550 MB)**, balances Tamil accuracy and speed. Smaller and larger models
-are one click away in **Models**, and any ggml Whisper `.bin` you drop in the models folder shows up too,
-including Tamil fine-tunes converted with [`scripts/convert-tamil-model.sh`](scripts/convert-tamil-model.sh).
+Mozhi downloads a model on first run from Hugging Face and verifies it by SHA-256. The default is
+**Tamil Small**, Whisper fine-tuned on Tamil by [IIT Madras SPRING Lab](https://huggingface.co/vasista22/whisper-tamil-small)
+(about 265 MB): the most accurate Tamil in the catalogue, and fast. It writes everything in Tamil script, so if you
+dictate a lot of English, pick **Whisper large-v3-turbo** (Q5, about 575 MB) in **Models**. Any ggml Whisper `.bin`
+you drop in the models folder shows up too, including fine-tunes converted with
+[`scripts/convert-tamil-model.sh`](scripts/convert-tamil-model.sh).
 
 ## Install
 

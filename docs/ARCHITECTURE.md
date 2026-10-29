@@ -27,6 +27,12 @@ optional clean-up pass uses a **local LLM through Ollama**. Nothing leaves the m
 4. **⌃⌃ or ↵** commits: final whisper pass → optional LLM polish (timeout → raw text) → paste into
    the app the user is in *now* → restore the clipboard → history.
 5. **Esc** cancels and discards the audio.
+6. **Click the transcript** (or turn on *Pause to edit before inserting*) to stop listening and edit
+   the final text in the overlay. The panel takes keyboard focus (`platform::focus_overlay`; on macOS
+   a non-activating panel becoming key, so the user's app stays frontmost). **↵** hands focus back
+   (`platform::unfocus_overlay`) and pastes into the app captured at ⌃⌃; **⇧↵** is a new line.
+7. The **clipboard button** saves the transcript to History and the clipboard without pasting, and
+   opens History, where **Copy all** copies every dictation.
 
 ## Modules and ownership
 
@@ -54,10 +60,11 @@ optional clean-up pass uses a **local LLM through Ollama**. Nothing leaves the m
 
 ## Models
 
-Default: **whisper large-v3-turbo (q5_0)** — multilingual, handles Tamil and code-switched English,
-~550 MB, Metal-accelerated on Apple Silicon. The catalog also lists smaller/faster models and
-**Tamil fine-tunes** of Whisper (converted to ggml) for the best Tamil accuracy. See
-`engine/models.rs`.
+Default: **Tamil Small** — Whisper small fine-tuned on Tamil by IIT Madras SPRING Lab
+(vasista22/whisper-tamil-small, q8_0 ggml, ~265 MB). It is the most accurate Tamil model in the
+catalog but Tamil-only: English words come out in Tamil script. **whisper large-v3-turbo (q5_0)**,
+~575 MB, is the pick for heavy code-switching and English. With no model chosen, Mozhi uses the
+default if it is downloaded, otherwise any installed model. See `engine/models.rs`.
 
 ## Language modes
 

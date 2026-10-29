@@ -11,5 +11,5 @@ export const SITE = {
   contributing: `${REPO_URL}/blob/main/CONTRIBUTING.md`,
   license: `${REPO_URL}/blob/main/LICENSE`,
   buildFromSource: `${REPO_URL}#building-from-source`,
-  version: "0.1.0",
+  version: "0.2.0",
 };

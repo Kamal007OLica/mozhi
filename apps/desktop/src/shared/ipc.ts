@@ -5,7 +5,7 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
 export type OutputMode = "auto" | "tamil" | "tanglish" | "english";
 export type TriggerKey = "control" | "rightControl" | "option" | "rightOption" | "fn";
-export type Phase = "idle" | "starting" | "listening" | "transcribing" | "inserting" | "done" | "error";
+export type Phase = "idle" | "starting" | "listening" | "transcribing" | "editing" | "inserting" | "done" | "error";
 export type PermState = "granted" | "denied" | "notDetermined" | "notRequired";
 export type PermissionKind = "microphone" | "accessibility";
 
@@ -27,6 +27,7 @@ export interface Settings {
   modelId: string;
   hotkey: HotkeyConfig;
   commitOnEnter: boolean;
+  reviewBeforeInsert: boolean;
   autoPaste: boolean;
   restoreClipboard: boolean;
   livePreview: boolean;
@@ -139,6 +140,10 @@ export const api = {
   toggleDictation: () => invoke<void>("toggle_dictation"),
   commitDictation: () => invoke<void>("commit_dictation"),
   cancelDictation: () => invoke<void>("cancel_dictation"),
+  editDictation: () => invoke<void>("edit_dictation"),
+  updateDraft: (text: string) => invoke<void>("update_draft", { text }),
+  insertDraft: (text: string) => invoke<void>("insert_draft", { text }),
+  openHistory: () => invoke<void>("open_history"),
   setOutputMode: (mode: OutputMode) => invoke<void>("set_output_mode", { mode }),
   overlayResize: (width: number, height: number) => invoke<void>("overlay_resize", { width, height }),
   overlayDragged: () => invoke<void>("overlay_dragged"),

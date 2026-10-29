@@ -29,7 +29,7 @@ body:
     id: model
     attributes:
       label: Speech model
-      placeholder: Whisper Large v3 Turbo · Q5
+      placeholder: Tamil Small · fine-tuned
   - type: input
     id: dialect
     attributes:

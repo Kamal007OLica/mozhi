@@ -63,7 +63,7 @@ const store = {
 };
 
 const S = () => store.settings!;
-const activeModelId = () => S().modelId || store.models.find((m) => m.recommended)?.id || "large-v3-turbo-q5";
+const activeModelId = () => S().modelId || store.models.find((m) => m.recommended)?.id || "tamil-small-q8";
 const activeModel = () => store.models.find((m) => m.id === activeModelId());
 const permOk = (s: string) => s === "granted" || s === "notRequired";
 const ready = () => !!activeModel()?.installed && permOk(store.perms.microphone) && permOk(store.perms.accessibility);
@@ -342,6 +342,7 @@ function shortcutPage() {
       h("div", { class: "segmented", role: "group", "aria-label": t("shortcut.title") }, ...keys.map((k) => h("button", { "aria-pressed": String(s.hotkey.key === k), onclick: () => save({ hotkey: { ...s.hotkey, key: k } }) }, `${triggerGlyph(k)} ${triggerGlyph(k)}`))),
       h("div", { class: "row", style: "margin-top:12px" }, h("div", { class: "label" }, t("shortcut.speed")), gap, h("span", { class: "mono" }, `${s.hotkey.doubleTapMs} ms`)),
       row("shortcut.enter", toggle(s.commitOnEnter, (v) => save({ commitOnEnter: v }), t("shortcut.enter"))),
+      row("shortcut.review", toggle(s.reviewBeforeInsert, (v) => save({ reviewBeforeInsert: v }), t("shortcut.review"))),
       row("shortcut.position", h("button", { class: "btn small", disabled: !s.overlayPosition, onclick: () => save({ overlayPosition: null }) }, t("shortcut.resetPos"))),
     ),
     h("section", { class: "card", style: "margin-top:16px" }, h("p", { style: "margin:0" }, h("kbd", null, `${triggerGlyph(s.hotkey.key)}${triggerGlyph(s.hotkey.key)}`), "  ", getLang() === "ta" ? "தொடங்க / இட" : "start / insert", "   ·   ", h("kbd", null, "↵"), "  ", getLang() === "ta" ? "இட" : "insert", "   ·   ", h("kbd", null, "esc"), "  ", getLang() === "ta" ? "ரத்து" : "cancel")),
@@ -371,6 +372,19 @@ function historyPage() {
           { class: "row", style: "border:0;padding-top:0" },
           search,
           h("span", { style: "flex:1" }),
+          h(
+            "button",
+            {
+              class: "btn small",
+              onclick: async () => {
+                // Oldest first, so the notes read in the order they were said.
+                const all = [...store.history].reverse().map((i) => i.text.trim()).filter(Boolean).join("\n\n");
+                await api.copyText(all);
+                toast(t("history.copiedAll"));
+              },
+            },
+            t("history.copyAll"),
+          ),
           h(
             "button",
             {

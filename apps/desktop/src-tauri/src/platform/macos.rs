@@ -744,15 +744,25 @@ extern "C" fn no(_this: &AnyObject, _cmd: Sel) -> Bool {
     Bool::NO
 }
 
-/// NSPanel subclass that never becomes key or main. NSPanel declares no ivars of its
-/// own, so re-classing tao's NSWindow subclass instance onto it is layout-compatible.
+/// True only while the user edits the transcript in the overlay.
+static OVERLAY_KEYABLE: AtomicBool = AtomicBool::new(false);
+
+extern "C" fn keyable(_this: &AnyObject, _cmd: Sel) -> Bool {
+    Bool::new(OVERLAY_KEYABLE.load(Ordering::SeqCst))
+}
+
+/// NSPanel subclass that never becomes main, and becomes key only while the transcript is
+/// being edited. Being a non-activating panel, even then Mozhi is not activated: the user's
+/// app stays frontmost and gets keyboard focus back the moment the panel lets go.
+/// NSPanel declares no ivars of its own, so re-classing tao's NSWindow subclass instance
+/// onto it is layout-compatible.
 fn panel_class() -> &'static AnyClass {
     static CLASS: OnceLock<usize> = OnceLock::new();
     let ptr = *CLASS.get_or_init(|| {
         let superclass = AnyClass::get(c"NSPanel").expect("NSPanel");
         let cls = match ClassBuilder::new(c"MozhiOverlayPanel", superclass) {
             Some(mut b) => unsafe {
-                b.add_method(sel!(canBecomeKeyWindow), no as extern "C" fn(_, _) -> _);
+                b.add_method(sel!(canBecomeKeyWindow), keyable as extern "C" fn(_, _) -> _);
                 b.add_method(sel!(canBecomeMainWindow), no as extern "C" fn(_, _) -> _);
                 b.register()
             },
@@ -826,6 +836,7 @@ pub fn show_overlay(window: &tauri::WebviewWindow, position: Option<(f64, f64)>)
 }
 
 pub fn hide_overlay(window: &tauri::WebviewWindow) -> anyhow::Result<()> {
+    OVERLAY_KEYABLE.store(false, Ordering::SeqCst);
     let w = WindowPtr::of(window)?;
     window.run_on_main_thread(move || unsafe {
         let win = w.get();
@@ -833,6 +844,51 @@ pub fn hide_overlay(window: &tauri::WebviewWindow) -> anyhow::Result<()> {
             let _: () = msg_send![win, orderOut: null_mut::<AnyObject>()];
         }
     })?;
+    Ok(())
+}
+
+/// Runs `f` on the main thread and waits for it (≤ 1 s). Never call from the main thread.
+fn on_main_sync(window: &tauri::WebviewWindow, f: impl FnOnce() + Send + 'static) -> anyhow::Result<()> {
+    let (tx, rx) = std::sync::mpsc::sync_channel(1);
+    window.run_on_main_thread(move || {
+        f();
+        let _ = tx.send(());
+    })?;
+    let _ = rx.recv_timeout(Duration::from_secs(1));
+    Ok(())
+}
+
+pub fn focus_overlay(window: &tauri::WebviewWindow) -> anyhow::Result<()> {
+    OVERLAY_KEYABLE.store(true, Ordering::SeqCst);
+    let w = WindowPtr::of(window)?;
+    window.run_on_main_thread(move || unsafe {
+        let win = w.get();
+        if !win.is_null() {
+            let _: () = msg_send![win, makeKeyWindow];
+        }
+    })?;
+    Ok(())
+}
+
+pub fn unfocus_overlay(window: &tauri::WebviewWindow, target: Option<&FrontApp>) -> anyhow::Result<()> {
+    if !OVERLAY_KEYABLE.swap(false, Ordering::SeqCst) {
+        return Ok(());
+    }
+    let w = WindowPtr::of(window)?;
+    // Ordering the panel out drops its key status; bring it straight back as a non-key panel.
+    on_main_sync(window, move || unsafe {
+        let win = w.get();
+        if !win.is_null() {
+            let _: () = msg_send![win, orderOut: null_mut::<AnyObject>()];
+            let _: () = msg_send![win, orderFrontRegardless];
+        }
+    })?;
+    // The target never stopped being the active app, but re-activating it makes its window
+    // key again so the paste lands in the field the user was typing in.
+    if let Some(t) = target {
+        activate(t.pid);
+        thread::sleep(Duration::from_millis(60));
+    }
     Ok(())
 }
 

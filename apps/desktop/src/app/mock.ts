@@ -8,6 +8,7 @@ let settings: Settings = {
   modelId: "",
   hotkey: { key: "control", doubleTapMs: 380, maxTapMs: 260 },
   commitOnEnter: true,
+  reviewBeforeInsert: false,
   autoPaste: true,
   restoreClipboard: true,
   livePreview: true,
@@ -22,7 +23,8 @@ let settings: Settings = {
 };
 
 const models: ModelInfo[] = [
-  { id: "large-v3-turbo-q5", name: "Whisper Large v3 Turbo · Q5", description: "Best balance for Tamil and Tanglish. Fast on Apple Silicon.", sizeMb: 574, speed: 4, tamilQuality: 4, url: "", sha256: null, recommended: true, installed: true },
+  { id: "tamil-small-q8", name: "Tamil Small · fine-tuned", description: "Whisper fine-tuned on Tamil by IIT Madras SPRING Lab. The most accurate for Tamil, small and fast.", sizeMb: 264, speed: 4, tamilQuality: 4, url: "", sha256: null, recommended: true, installed: true },
+  { id: "large-v3-turbo-q5", name: "Whisper Large v3 Turbo · Q5", description: "Choose this if you mix in a lot of English: Tamil, Tanglish and English in one model.", sizeMb: 574, speed: 4, tamilQuality: 3, url: "", sha256: null, recommended: false, installed: false },
   { id: "large-v3-q5", name: "Whisper Large v3 · Q5", description: "Most accurate multilingual model; slower.", sizeMb: 1080, speed: 2, tamilQuality: 5, url: "", sha256: null, recommended: false, installed: false },
   { id: "small-q5", name: "Whisper Small · Q5", description: "Light and quick. Fine for English, rough on Tamil.", sizeMb: 190, speed: 5, tamilQuality: 2, url: "", sha256: null, recommended: false, installed: false },
 ];
@@ -46,6 +48,10 @@ export const mock: typeof Api = {
   toggleDictation: async () => {},
   commitDictation: async () => {},
   cancelDictation: async () => {},
+  editDictation: async () => {},
+  updateDraft: async () => {},
+  insertDraft: async () => {},
+  openHistory: async () => {},
   setOutputMode: async (mode) => void (settings = { ...settings, outputMode: mode }),
   overlayResize: async () => {},
   overlayDragged: async () => {},
@@ -58,5 +64,5 @@ export const mock: typeof Api = {
   polishStatus: () => wait({ reachable: false, models: [], error: "connection refused" }),
   copyText: async () => {},
   openMainWindow: async () => {},
-  appInfo: () => wait({ version: "0.1.0", os: "macos", arch: "aarch64", modelsDir: "~/Library/Application Support/app.mozhi.desktop/models" }),
+  appInfo: () => wait({ version: "0.2.0", os: "macos", arch: "aarch64", modelsDir: "~/Library/Application Support/app.mozhi.desktop/models" }),
 };

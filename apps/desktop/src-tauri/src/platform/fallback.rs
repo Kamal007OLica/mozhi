@@ -64,4 +64,13 @@ pub fn hide_overlay(window: &tauri::WebviewWindow) -> anyhow::Result<()> {
     Ok(())
 }
 
+pub fn focus_overlay(window: &tauri::WebviewWindow) -> anyhow::Result<()> {
+    window.set_focus()?;
+    Ok(())
+}
+
+pub fn unfocus_overlay(_window: &tauri::WebviewWindow, _target: Option<&FrontApp>) -> anyhow::Result<()> {
+    Ok(())
+}
+
 pub fn set_dock_visible(_app: &tauri::AppHandle, _visible: bool) {}

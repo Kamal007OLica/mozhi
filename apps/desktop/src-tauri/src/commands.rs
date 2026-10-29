@@ -138,6 +138,26 @@ pub fn cancel_dictation(ctrl: Ctrl) {
 }
 
 #[tauri::command]
+pub fn edit_dictation(ctrl: Ctrl) {
+    ctrl.inner().edit();
+}
+
+#[tauri::command]
+pub fn update_draft(ctrl: Ctrl, text: String) {
+    ctrl.update_draft(text);
+}
+
+#[tauri::command]
+pub fn insert_draft(ctrl: Ctrl, text: String) {
+    ctrl.inner().insert_edited(text);
+}
+
+#[tauri::command]
+pub fn open_history(ctrl: Ctrl) {
+    ctrl.inner().open_history();
+}
+
+#[tauri::command]
 pub fn set_output_mode(ctrl: Ctrl, mode: OutputMode) {
     ctrl.set_mode(mode);
     crate::tray::sync_mode(ctrl.app_handle(), mode);

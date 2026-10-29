@@ -31,7 +31,7 @@ body:
     attributes:
       label: Mozhi version
       description: Mozhi → About.
-      placeholder: "0.1.0"
+      placeholder: "0.2.0"
   - type: input
     id: app
     attributes:

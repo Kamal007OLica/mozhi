@@ -273,31 +273,65 @@ body.overlay-body {
   border-color: rgba(244, 196, 48, 0.6);
 }
 
-/* ── transcript ── */
+/* ── transcript ──
+   A textarea throughout: read-only while listening, editable once the user clicks in.
+   Never taller than three lines (height set in main.ts); when there is more, the older
+   text fades out at the top. */
 .transcript {
   position: relative;
   z-index: 3;
+  display: block;
+  box-sizing: border-box;
+  width: calc(100% - 32px);
   margin: 2px 16px 0;
-  padding: 8px 0 12px;
-  max-height: 150px;
+  padding: 8px 10px 10px;
+  border: 0;
+  border-radius: 14px;
+  outline: none;
+  resize: none;
   overflow-y: auto;
+  background: transparent;
+  color: var(--ink);
   font-family: var(--mz-font-display);
   font-size: 18.5px;
   line-height: 1.55;
   font-weight: 500;
   letter-spacing: 0.005em;
+  caret-color: var(--mz-manjal);
   user-select: text;
   -webkit-user-select: text;
   scrollbar-width: none;
-  mask-image: linear-gradient(to bottom, transparent 0, #000 16px);
+  transition:
+    background var(--mz-dur) var(--mz-ease-out),
+    box-shadow var(--mz-dur) var(--mz-ease-out);
 }
 .transcript::-webkit-scrollbar {
   display: none;
 }
-.transcript.empty {
+.transcript::placeholder {
   color: var(--muted);
   font-weight: 400;
   font-size: 15.5px;
+}
+.transcript.clipped {
+  mask-image: linear-gradient(to bottom, transparent 0, #000 22px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px);
+}
+.card[data-phase="listening"] .transcript,
+.card[data-phase="starting"] .transcript {
+  cursor: text;
+}
+.card[data-phase="listening"] .transcript:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+.card[data-phase="editing"] .transcript {
+  background: rgba(0, 0, 0, 0.28);
+  box-shadow:
+    inset 0 0 0 1px rgba(244, 196, 48, 0.45),
+    0 0 0 4px rgba(244, 196, 48, 0.08);
+}
+.card[data-phase="editing"] .status {
+  color: var(--mz-manjal);
 }
 
 /* ── footer ── */
@@ -330,7 +364,7 @@ body.overlay-body {
 }
 .state {
   flex: 1;
-  min-width: 0;
+  min-width: 64px;
   display: flex;
   flex-direction: column;
   line-height: 1.25;
@@ -407,6 +441,14 @@ body.overlay-body {
 }
 .icon-btn:hover {
   background: rgba(255, 255, 255, 0.12);
+}
+.history-btn {
+  display: grid;
+  place-items: center;
+  color: rgba(247, 240, 227, 0.85);
+}
+.history-btn:hover:not(:disabled) {
+  color: var(--mz-manjal);
 }
 .insert {
   padding: 0 18px;

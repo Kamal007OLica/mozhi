@@ -34,22 +34,9 @@ const HF: &str = "https://huggingface.co";
 
 pub(crate) const CATALOG: &[Entry] = &[
     Entry {
-        id: "large-v3-turbo-q5",
-        name: "Whisper Large v3 Turbo · Q5",
-        description: "Best all-rounder: Tamil, Tanglish and English in one model, and keeps English words in English. Fast on Apple Silicon and modern PCs.",
-        file: "ggml-large-v3-turbo-q5_0.bin",
-        url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin",
-        bytes: 574_041_195,
-        sha256: "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2",
-        speed: 4,
-        tamil_quality: 3,
-        kind: ModelKind::Multilingual,
-        recommended: true,
-    },
-    Entry {
         id: "tamil-small-q8",
         name: "Tamil Small · fine-tuned",
-        description: "Whisper fine-tuned on Tamil by IIT Madras SPRING Lab (vasista22). The most accurate choice for pure Tamil, and light. Tamil only: English words come out in Tamil script.",
+        description: "Whisper fine-tuned on Tamil by IIT Madras SPRING Lab. The most accurate for Tamil, small (265 MB) and fast. Tamil only: English words come out in Tamil script.",
         file: "ggml-tamil-small-q8_0.bin",
         url: "https://huggingface.co/Pomni/whisper-tamil-small-ggml-allquants/resolve/main/ggml-tamil-small-q8_0.bin",
         bytes: 264_464_607,
@@ -57,6 +44,19 @@ pub(crate) const CATALOG: &[Entry] = &[
         speed: 4,
         tamil_quality: 4,
         kind: ModelKind::TamilOnly,
+        recommended: true,
+    },
+    Entry {
+        id: "large-v3-turbo-q5",
+        name: "Whisper Large v3 Turbo · Q5",
+        description: "Choose this if you mix in a lot of English or dictate in English: Tamil, Tanglish and English in one model, and keeps English words in English.",
+        file: "ggml-large-v3-turbo-q5_0.bin",
+        url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin",
+        bytes: 574_041_195,
+        sha256: "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2",
+        speed: 4,
+        tamil_quality: 3,
+        kind: ModelKind::Multilingual,
         recommended: false,
     },
     Entry {
@@ -75,7 +75,7 @@ pub(crate) const CATALOG: &[Entry] = &[
     Entry {
         id: "large-v3-turbo",
         name: "Whisper Large v3 Turbo · full precision",
-        description: "Same as the recommended model without quantisation. Marginally more accurate, three times the size.",
+        description: "Large v3 Turbo without quantisation. Marginally more accurate, three times the size.",
         file: "ggml-large-v3-turbo.bin",
         url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin",
         bytes: 1_624_555_275,
@@ -143,7 +143,7 @@ const CUSTOM_PREFIX: &str = "custom:";
 
 /// Model used when the user has not picked one.
 pub fn default_model_id() -> &'static str {
-    "large-v3-turbo-q5"
+    "tamil-small-q8"
 }
 
 fn entry(id: &str) -> Option<&'static Entry> {
